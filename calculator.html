@@ -31,7 +31,7 @@
   .rc-label{font-weight:800; color:#111; font-size:14px;}
   .rc-input, .rc-select{
     width:100%; padding:10px 12px; border:1px solid #cfd6df; border-radius:12px; margin-top:6px;
-    font-size:15px; outline:none;
+    font-size:15px; outline:none; box-sizing:border-box;
   }
   .rc-input:focus, .rc-select:focus{border-color: var(--blue); box-shadow: 0 0 0 3px rgba(30,100,226,.15);}
 
@@ -49,7 +49,7 @@
     display:flex; align-items:center; gap:10px; border:1px solid var(--border); border-radius:14px; padding:12px;
     cursor:pointer; user-select:none; background:#fff;
   }
-  .rc-choice input{transform: scale(1.15);}
+  .rc-choice input{transform: scale(1.15); pointer-events:none;}
   .rc-choice strong{display:block;}
   .rc-choice small{display:block; color:var(--muted); margin-top:2px;}
   .rc-choice.selected{border-color: var(--blue); box-shadow: 0 0 0 3px rgba(30,100,226,.12);}
@@ -75,7 +75,6 @@
   .rc-h3{margin: 0 0 10px; text-align:center; font-size:22px; font-weight:900; color:#111;}
   .rc-center{ text-align:center; }
 
-  /* bar compare */
   .rc-barWrap{background:var(--soft); border-radius:14px; padding:14px;}
   .rc-barRow{display:flex; align-items:center; gap:10px; margin:10px 0;}
   .rc-barLbl{width:120px; font-weight:900;}
@@ -83,7 +82,6 @@
   .rc-barFill{height:18px; width:0%; background:#999;}
   .rc-barVal{width:150px; text-align:right; font-weight:900;}
 
-  /* mini charts */
   .rc-miniChart{
     display:flex; gap:6px; align-items:flex-end; height:150px; padding:12px; background:#fff; border-radius:12px;
     overflow-x:auto; border:1px solid var(--border);
@@ -96,7 +94,6 @@
   .rc-b.i{background:var(--blue); width:10px;}
   .rc-yearLbl{font-size:10px; color:var(--muted);}
 
-  /* comparison table */
   .rc-table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:14px; border:1px solid var(--border);}
   .rc-table th, .rc-table td{padding:12px 10px; border-bottom:1px solid var(--border); font-size:14px;}
   .rc-table th{background:#f7fafc; text-align:left; font-weight:900;}
@@ -106,7 +103,6 @@
   .rc-badge.bad{background:#fff1f1; color:#a61b1b;}
   .rc-badge.mid{background:#fff7e6; color:#8b5a00;}
 
-  /* responsive */
   @media (max-width: 820px){
     .rc-grid{grid-template-columns: 1fr;}
     .rc-grid-3{grid-template-columns: 1fr;}
@@ -135,36 +131,37 @@
     <div class="rc-grid">
       <div>
         <div class="rc-label">Initial Investment Amount ($)</div>
-        <input class="rc-input" id="initialAmount" type="number" value="100000" min="0" step="1000">
+        <input class="rc-input" id="rcInitialAmount" type="number" value="100000" min="0" step="1000">
       </div>
       <div>
         <div class="rc-label">Years to Retirement</div>
-        <input class="rc-input" id="years" type="number" value="10" min="1" max="50">
+        <input class="rc-input" id="rcYears" type="number" value="10" min="1" max="50">
       </div>
       <div>
         <div class="rc-label">Current Age</div>
-        <input class="rc-input" id="age" type="number" value="55" min="18" max="85">
+        <input class="rc-input" id="rcAge" type="number" value="55" min="18" max="85">
       </div>
       <div>
         <div class="rc-label">State (helps match the right expert)</div>
-        <input class="rc-input" id="state" type="text" value="" placeholder="e.g., FL">
+        <input class="rc-input" id="rcState" type="text" value="" placeholder="e.g., FL">
       </div>
     </div>
-
     <div class="rc-row" style="margin-top:14px; justify-content:flex-end;">
-      <button class="rc-btn" id="btnNext1">Next →</button>
+      <!-- FIXED: inline onclick so this works regardless of script/DOM timing -->
+      <button class="rc-btn" onclick="rcNext(1)">Next →</button>
     </div>
     <div class="rc-note">Tip: People searching "best annuity rates" usually want side-by-side comparisons. You'll get those in Step 2.</div>
   </div>
 
   <!-- STEP 2 -->
-  <!-- FIX: removed inline onclick="rcTogglePlan('...')" from all labels;
-       click handling is set up in the init block below -->
   <div class="rc-card" id="step2" style="display:none;">
     <div class="rc-h3">Step 2 — Choose What To Compare (pick up to 3)</div>
 
     <div class="rc-grid-3" style="margin-top:10px;">
-      <label class="rc-choice" id="lbl_fia">
+      <!-- FIXED: inline onclick on label; pointer-events:none on checkbox so
+           only the label onclick fires (prevents the checkbox from also
+           triggering a second bubbled click to the label). -->
+      <label class="rc-choice" onclick="rcTogglePlan('fia')">
         <input type="checkbox" id="pick_fia">
         <div>
           <strong>Indexed Annuity (FIA)</strong>
@@ -172,7 +169,7 @@
         </div>
       </label>
 
-      <label class="rc-choice" id="lbl_fixed">
+      <label class="rc-choice" onclick="rcTogglePlan('fixed')">
         <input type="checkbox" id="pick_fixed">
         <div>
           <strong>Fixed Annuity</strong>
@@ -180,7 +177,7 @@
         </div>
       </label>
 
-      <label class="rc-choice" id="lbl_variable">
+      <label class="rc-choice" onclick="rcTogglePlan('variable')">
         <input type="checkbox" id="pick_variable">
         <div>
           <strong>Variable Annuity</strong>
@@ -188,7 +185,7 @@
         </div>
       </label>
 
-      <label class="rc-choice" id="lbl_mf">
+      <label class="rc-choice" onclick="rcTogglePlan('mf')">
         <input type="checkbox" id="pick_mf">
         <div>
           <strong>Mutual Fund</strong>
@@ -196,7 +193,7 @@
         </div>
       </label>
 
-      <label class="rc-choice" id="lbl_bonds">
+      <label class="rc-choice" onclick="rcTogglePlan('bonds')">
         <input type="checkbox" id="pick_bonds">
         <div>
           <strong>Bond Portfolio</strong>
@@ -208,11 +205,11 @@
         <div class="rc-label">Assumptions (adjust these)</div>
         <div style="margin-top:10px;">
           <div class="rc-label">Market Avg Return (%)</div>
-          <input class="rc-input" id="marketReturn" type="number" value="7" step="0.25">
+          <input class="rc-input" id="rcMarketReturn" type="number" value="7" step="0.25">
         </div>
         <div style="margin-top:10px;">
           <div class="rc-label">Inflation Rate (%)</div>
-          <input class="rc-input" id="inflation" type="number" value="3" step="0.25">
+          <input class="rc-input" id="rcInflation" type="number" value="3" step="0.25">
         </div>
       </div>
     </div>
@@ -222,32 +219,27 @@
     <div class="rc-grid">
       <div class="rc-card">
         <div class="rc-label">FIA Cap Rate (%)</div>
-        <input class="rc-input" id="capRate" type="number" value="10" step="0.25">
+        <input class="rc-input" id="rcCapRate" type="number" value="10" step="0.25">
         <div class="rc-note">Higher cap = higher upside. FIA is modeled as "no downside" here.</div>
       </div>
-
       <div class="rc-card">
         <div class="rc-label">Mutual Fund Annual Fee (%)</div>
-        <input class="rc-input" id="mgmtFee" type="number" value="1.5" step="0.1">
-        <div class="rc-note">Fees compound over time. This is why "low cost annuities" and "fees" matter.</div>
+        <input class="rc-input" id="rcMgmtFee" type="number" value="1.5" step="0.1">
+        <div class="rc-note">Fees compound over time.</div>
       </div>
-
       <div class="rc-card">
         <div class="rc-label">Fixed Annuity Credited Rate (%)</div>
-        <input class="rc-input" id="fixedRate" type="number" value="4.5" step="0.1">
+        <input class="rc-input" id="rcFixedRate" type="number" value="4.5" step="0.1">
       </div>
-
       <div class="rc-card">
         <div class="rc-label">Variable Annuity Fee/Cost (%)</div>
-        <input class="rc-input" id="vaFee" type="number" value="2.5" step="0.1">
+        <input class="rc-input" id="rcVaFee" type="number" value="2.5" step="0.1">
         <div class="rc-note">Simplified model: VA ≈ market return − VA costs.</div>
       </div>
-
       <div class="rc-card">
         <div class="rc-label">Bond Portfolio Return (%)</div>
-        <input class="rc-input" id="bondReturn" type="number" value="4.0" step="0.1">
+        <input class="rc-input" id="rcBondReturn" type="number" value="4.0" step="0.1">
       </div>
-
       <div class="rc-card">
         <div class="rc-label">Stress Test Scenario</div>
         <div class="rc-stress" style="margin-top:10px;">
@@ -256,13 +248,13 @@
           <div class="rc-tag" onclick="rcSetStress('2022')" id="stress_2022">2022 Down Year</div>
           <div class="rc-tag" onclick="rcSetStress('flat')" id="stress_flat">Flat Decade</div>
         </div>
-        <div class="rc-note">Stress tests help answer "are annuities a good investment?" by showing downside impact.</div>
+        <div class="rc-note">Stress tests show downside impact across plan types.</div>
       </div>
     </div>
 
     <div class="rc-row" style="margin-top:14px; justify-content:space-between;">
-      <button class="rc-btn ghost" id="btnBack2">← Back</button>
-      <button class="rc-btn" id="btnNext2">Next →</button>
+      <button class="rc-btn ghost" onclick="rcBack(2)">← Back</button>
+      <button class="rc-btn" onclick="rcNext(2)">Next →</button>
     </div>
   </div>
 
@@ -272,7 +264,7 @@
     <div class="rc-grid">
       <div>
         <div class="rc-label">Primary Priority</div>
-        <select class="rc-select" id="priority">
+        <select class="rc-select" id="rcPriority">
           <option value="protection">Principal protection</option>
           <option value="growth">Growth potential</option>
           <option value="income">Guaranteed income</option>
@@ -281,47 +273,41 @@
         </select>
         <div class="rc-note">This will personalize your recommendation and expert match.</div>
       </div>
-
       <div>
         <div class="rc-label">Goal (optional)</div>
-        <select class="rc-select" id="goal">
+        <select class="rc-select" id="rcGoal">
           <option value="compare">Compare best options</option>
           <option value="rates">Find best annuity rates</option>
           <option value="income">Estimate retirement income</option>
           <option value="safety">Reduce risk / volatility</option>
         </select>
       </div>
-
       <div>
         <div class="rc-label">Target Retirement Age (optional)</div>
-        <input class="rc-input" id="retireAge" type="number" value="65" min="40" max="85">
+        <input class="rc-input" id="rcRetireAge" type="number" value="65" min="40" max="85">
       </div>
-
       <div>
         <div class="rc-label">Income Mode</div>
-        <select class="rc-select" id="incomeMode">
+        <select class="rc-select" id="rcIncomeMode">
           <option value="rule4">Estimate using 4% rule (portfolio-style)</option>
           <option value="annuityPayout">Estimate using annuity payout rate</option>
         </select>
         <div class="rc-note">We'll compute a monthly income estimate from projected values.</div>
       </div>
-
       <div>
         <div class="rc-label">Annuity Payout Rate (% / year)</div>
-        <input class="rc-input" id="payoutRate" type="number" value="5.0" step="0.1">
-        <div class="rc-note">Typical payout assumptions vary by age &amp; product. This keeps it adjustable.</div>
+        <input class="rc-input" id="rcPayoutRate" type="number" value="5.0" step="0.1">
+        <div class="rc-note">Typical payout assumptions vary by age &amp; product.</div>
       </div>
-
       <div>
         <div class="rc-label">How long should income last? (years)</div>
-        <input class="rc-input" id="incomeYears" type="number" value="25" min="5" max="40">
+        <input class="rc-input" id="rcIncomeYears" type="number" value="25" min="5" max="40">
         <div class="rc-note">Used for context only (your expert can refine this).</div>
       </div>
     </div>
-
     <div class="rc-row" style="margin-top:14px; justify-content:space-between;">
-      <button class="rc-btn ghost" id="btnBack3">← Back</button>
-      <button class="rc-btn" id="btnNext3">See Results →</button>
+      <button class="rc-btn ghost" onclick="rcBack(3)">← Back</button>
+      <button class="rc-btn" onclick="rcNext(3)">See Results →</button>
     </div>
   </div>
 
@@ -335,21 +321,19 @@
 
     <div class="rc-center">
       <div style="font-weight:900; font-size:16px; color:#111;">Estimated Monthly Income</div>
-      <div id="monthlyIncome" style="font-size:36px; font-weight:900; color:var(--ink); margin-top:6px;">—</div>
+      <div id="rcMonthlyIncome" style="font-size:36px; font-weight:900; color:var(--ink); margin-top:6px;">—</div>
       <div style="margin-top:10px; color:var(--muted);">
         Inflation-adjusted monthly income at retirement:
-        <span id="monthlyIncomeReal" style="font-weight:900; color:#111;">—</span>
+        <span id="rcMonthlyIncomeReal" style="font-weight:900; color:#111;">—</span>
       </div>
     </div>
 
-    <!-- Pro-Annuity CTA (always shows, but custom messaging) -->
+    <!-- CTA block -->
     <div id="expertCTA" style="margin-top:18px; padding:18px; border-radius:16px; background:#eef5ff; border:2px solid #a9c6ff;">
       <div id="ctaTitle" style="font-size:18px; font-weight:900; margin-bottom:6px;">We found the right expert type for your needs</div>
       <div id="ctaBody" style="color:#1f2937; line-height:1.55;"></div>
-
       <div class="rc-row" style="margin-top:12px; justify-content:space-between;">
-        <!-- FIX: renamed second btnBack4 to btnBack4b to avoid duplicate IDs -->
-        <button class="rc-btn ghost" id="btnBack4">← Back</button>
+        <button class="rc-btn ghost" onclick="rcBack(4)">← Back</button>
         <a id="ctaLink" class="rc-btn" href="#" style="text-decoration:none; display:inline-block;">
           Find My Expert Match →
         </a>
@@ -361,21 +345,18 @@
 
     <div class="rc-h3" style="margin-bottom:12px;">Visual Breakdown</div>
 
-    <!-- BAR COMPARE -->
     <div class="rc-barWrap">
       <div style="font-weight:900; margin-bottom:6px;">Final Values (Selected Plans)</div>
       <div id="barArea"></div>
       <div class="rc-note">Bars are normalized to the top plan value.</div>
     </div>
 
-    <!-- Growth Chart -->
     <div style="margin-top:16px;">
       <div style="font-weight:900; margin-bottom:8px;">Growth Over Time (Year-by-Year)</div>
       <div class="rc-miniChart" id="growthChart"></div>
       <div class="rc-note">Each year shows your top 2 selected plans (green/red) for quick comparison.</div>
     </div>
 
-    <!-- Inflation Chart -->
     <div style="margin-top:16px;">
       <div style="font-weight:900; margin-bottom:8px;">Inflation Decay Curve (Purchasing Power of $1)</div>
       <div class="rc-miniChart" id="inflationChart" style="height:120px;"></div>
@@ -387,52 +368,53 @@
     <div class="rc-h3">Comparison Summary</div>
     <table class="rc-table" id="summaryTable"></table>
 
+    <!-- FIXED: this was a duplicate id="btnBack4"; now an inline onclick, no id needed -->
     <div class="rc-row" style="margin-top:14px; justify-content:space-between;">
-      <!-- FIX: unique ID for this second back button in step 4 -->
-      <button class="rc-btn ghost" id="btnBack4b">← Back</button>
-      <button class="rc-btn secondary" id="btnRestart">Start Over</button>
+      <button class="rc-btn ghost" onclick="rcBack(4)">← Back</button>
+      <button class="rc-btn secondary" onclick="rcRestart()">Start Over</button>
     </div>
   </div>
 </div>
 
 <script>
   // ========= CONFIG =========
-  // Change this to your matching/enquiry page:
   const EXPERT_MATCH_URL = "https://primeretirementhub.com/find-an-expert";
 
   // ========= STATE =========
-  let rcState = {
+  var rcState = {
     step: 1,
     stress: "normal",
-    picks: new Set(["fia","mf"]), // default picks
+    picks: new Set(["fia","mf"])
   };
 
   // ========= HELPERS =========
-  const $ = (id)=>document.getElementById(id);
-  const money = (n)=>"$"+Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-  const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
+  // All element IDs are now prefixed "rc" to avoid collisions with the
+  // host page or other GHL elements.
+  function rcEl(id){ return document.getElementById(id); }
+  function rcMoney(n){ return "$"+Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function rcClamp(n,lo,hi){ return Math.max(lo,Math.min(hi,n)); }
 
-  function setStepper(step){
-    const pills = document.querySelectorAll("#rcStepper .rc-pill");
-    pills.forEach(p=>{
-      p.classList.toggle("active", Number(p.dataset.step)===step);
-    });
+  function rcSetStepper(step){
+    var pills = document.querySelectorAll("#rcStepper .rc-pill");
+    pills.forEach(function(p){ p.classList.toggle("active", Number(p.dataset.step)===step); });
   }
 
   function showStep(step){
     rcState.step = step;
-    setStepper(step);
-    ["step1","step2","step3","step4"].forEach((s,i)=>{
-      $(s).style.display = (i+1===step) ? "block" : "none";
+    rcSetStepper(step);
+    ["step1","step2","step3","step4"].forEach(function(s,i){
+      rcEl(s).style.display = (i+1===step) ? "block" : "none";
     });
-    window.scrollTo({top: document.getElementById("rc").offsetTop - 20, behavior:"smooth"});
+    var top = rcEl("rc").offsetTop - 20;
+    window.scrollTo({top: top < 0 ? 0 : top, behavior:"smooth"});
   }
 
+  // Called by inline onclick on every nav button — no addEventListener needed.
   function rcNext(from){
     if(from===1){
-      const initial = Number($("initialAmount").value||0);
-      const years = Number($("years").value||0);
-      if(initial<=0 || years<1){ alert("Please enter a valid amount and years."); return; }
+      var initial = Number(rcEl("rcInitialAmount").value||0);
+      var yrs = Number(rcEl("rcYears").value||0);
+      if(initial<=0 || yrs<1){ alert("Please enter a valid amount and at least 1 year."); return; }
     }
     if(from===2){
       if(rcState.picks.size<2){ alert("Pick at least 2 plans to compare."); return; }
@@ -441,433 +423,261 @@
     if(from+1===4) rcRun();
   }
 
-  function rcBack(current){
-    showStep(current-1);
-  }
+  function rcBack(current){ showStep(current-1); }
 
   function rcRestart(){
     rcState = {step:1, stress:"normal", picks:new Set(["fia","mf"])};
-    $("pick_fia").checked = true;
-    $("pick_mf").checked = true;
-    ["fixed","variable","bonds"].forEach(k=> $("pick_"+k).checked=false );
+    rcEl("pick_fia").checked = true;
+    rcEl("pick_mf").checked = true;
+    ["fixed","variable","bonds"].forEach(function(k){ rcEl("pick_"+k).checked = false; });
     rcSetStress("normal");
-    updateChoiceStyles();
+    rcUpdateChoiceStyles();
     showStep(1);
   }
 
-  // ========= PICK LIMIT (max 3) =========
+  // ========= PLAN SELECTION =========
+  // pointer-events:none on checkboxes means only the label onclick fires.
+  // The label click is the sole trigger, so we manually toggle here.
   function rcTogglePlan(key){
-    const cb = $("pick_"+key);
-    setTimeout(()=>{
-      const checked = cb.checked;
-      if(checked){
-        if(rcState.picks.size>=3){
-          cb.checked=false;
-          alert("You can compare up to 3 plans at a time.");
-          return;
-        }
-        rcState.picks.add(key);
-      }else{
-        rcState.picks.delete(key);
-      }
-      if(rcState.picks.size<2){
-        cb.checked=true;
-        rcState.picks.add(key);
-        alert("Please keep at least 2 selected for a comparison.");
-      }
-      updateChoiceStyles();
-    },0);
+    var cb = rcEl("pick_"+key);
+    // Flip the checkbox ourselves (since the checkbox has pointer-events:none,
+    // the browser won't auto-toggle it via label default-action either).
+    var nowChecked = !cb.checked;
+    if(nowChecked && rcState.picks.size>=3){
+      alert("You can compare up to 3 plans at a time.");
+      return;
+    }
+    if(!nowChecked && rcState.picks.size<=2){
+      alert("Please keep at least 2 selected for a comparison.");
+      return;
+    }
+    cb.checked = nowChecked;
+    if(nowChecked){ rcState.picks.add(key); } else { rcState.picks.delete(key); }
+    rcUpdateChoiceStyles();
   }
 
-  function updateChoiceStyles(){
-    ["fia","fixed","variable","mf","bonds"].forEach(k=>{
-      const cb = $("pick_"+k);
-      const label = cb.closest(".rc-choice");
-      label.classList.toggle("selected", cb.checked);
+  function rcUpdateChoiceStyles(){
+    ["fia","fixed","variable","mf","bonds"].forEach(function(k){
+      var cb = rcEl("pick_"+k);
+      if(!cb) return;
+      var label = cb.closest(".rc-choice");
+      if(label) label.classList.toggle("selected", cb.checked);
     });
   }
 
   // ========= STRESS SCENARIOS =========
   function rcSetStress(mode){
     rcState.stress = mode;
-    ["normal","2008","2022","flat"].forEach(m=>{
-      $("stress_"+m).classList.toggle("active", m===mode);
+    ["normal","2008","2022","flat"].forEach(function(m){
+      rcEl("stress_"+m).classList.toggle("active", m===mode);
     });
   }
 
-  // ========= CALCULATION MODELS =========
-  function buildMarketSeries(years, avgReturn, stress){
-    const base = [];
-    const wiggles = [0.02, -0.01, 0.015, -0.005, 0.01, -0.015, 0.005, 0.0, 0.012, -0.008];
-    for(let i=0;i<years;i++){
-      base.push(avgReturn + (wiggles[i % wiggles.length]));
-    }
+  // ========= SIMULATION =========
+  function rcBuildMarketSeries(years, avgReturn, stress){
+    var wiggles = [0.02,-0.01,0.015,-0.005,0.01,-0.015,0.005,0.0,0.012,-0.008];
+    var base = [];
+    for(var i=0;i<years;i++) base.push(avgReturn + wiggles[i % wiggles.length]);
 
-    if(stress==="flat"){
-      return Array.from({length:years}, ()=>0.0);
-    }
-
+    if(stress==="flat") return base.map(function(){ return 0; });
     if(stress==="2022"){
-      const s = base.slice();
-      if(years>=1) s[0] = -0.18;
-      for(let i=1;i<years;i++) s[i] = Math.min(s[i], avgReturn+0.02);
+      var s = base.slice();
+      if(years>=1) s[0]=-0.18;
+      for(var j=1;j<years;j++) s[j]=Math.min(s[j], avgReturn+0.02);
       return s;
     }
-
     if(stress==="2008"){
-      const s = base.slice();
-      if(years>=1) s[0] = -0.38;
-      if(years>=2) s[1] = 0.18;
-      if(years>=3) s[2] = 0.12;
-      return s;
+      var s2 = base.slice();
+      if(years>=1) s2[0]=-0.38;
+      if(years>=2) s2[1]=0.18;
+      if(years>=3) s2[2]=0.12;
+      return s2;
     }
-
-    return base; // normal
+    return base;
   }
 
-  function simulatePlan(planKey, initial, years, params){
-    const { cap, marketSeries, mgmtFee, fixedRate, vaFee, bondReturn } = params;
-    let v = initial;
-    const series = [v];
-
-    for(let i=0;i<years;i++){
-      const r = marketSeries[i];
-
-      if(planKey==="fia"){
-        const credited = Math.max(Math.min(r, cap), 0);
-        v *= (1 + credited);
-      } else if(planKey==="mf"){
-        v *= (1 + r - mgmtFee);
-      } else if(planKey==="fixed"){
-        v *= (1 + fixedRate);
-      } else if(planKey==="variable"){
-        v *= (1 + r - vaFee);
-      } else if(planKey==="bonds"){
-        v *= (1 + bondReturn);
-      }
-
+  function rcSimulatePlan(planKey, initial, years, params){
+    var cap=params.cap, ms=params.ms, mf=params.mf, fr=params.fr, vf=params.vf, br=params.br;
+    var v=initial, series=[v];
+    for(var i=0;i<years;i++){
+      var r=ms[i];
+      if(planKey==="fia")      v*=(1+Math.max(Math.min(r,cap),0));
+      else if(planKey==="mf")  v*=(1+r-mf);
+      else if(planKey==="fixed")    v*=(1+fr);
+      else if(planKey==="variable") v*=(1+r-vf);
+      else if(planKey==="bonds")    v*=(1+br);
       series.push(v);
     }
-    return { final: v, series };
+    return {final:v, series:series};
   }
 
-  function planName(key){
-    return ({
-      fia:"Indexed Annuity (FIA)",
-      mf:"Mutual Fund (MF)",
-      fixed:"Fixed Annuity",
-      variable:"Variable Annuity",
-      bonds:"Bond Portfolio"
-    })[key] || key;
+  function rcPlanName(key){
+    return ({fia:"Indexed Annuity (FIA)",mf:"Mutual Fund (MF)",fixed:"Fixed Annuity",variable:"Variable Annuity",bonds:"Bond Portfolio"})[key]||key;
   }
+  function rcPlanColor(key){ return (key==="fia"||key==="fixed")?"green":(key==="mf"||key==="variable")?"red":"blue"; }
 
-  function planColor(key){
-    return (key==="fia" || key==="fixed") ? "green" : (key==="mf" || key==="variable") ? "red" : "blue";
-  }
-
-  // ========= RESULTS RENDER =========
+  // ========= RUN & RENDER =========
   function rcRun(){
-    const initial = Number($("initialAmount").value||0);
-    const years = Number($("years").value||10);
-    const age = Number($("age").value||55);
-    const state = ($("state").value||"").trim();
+    var initial  = Number(rcEl("rcInitialAmount").value||0);
+    var years    = Number(rcEl("rcYears").value||10);
+    var age      = Number(rcEl("rcAge").value||55);
+    var state    = (rcEl("rcState").value||"").trim();
+    var cap      = Number(rcEl("rcCapRate").value||0)/100;
+    var avgMkt   = Number(rcEl("rcMarketReturn").value||0)/100;
+    var infl     = Number(rcEl("rcInflation").value||0)/100;
+    var mf       = Number(rcEl("rcMgmtFee").value||0)/100;
+    var fr       = Number(rcEl("rcFixedRate").value||0)/100;
+    var vf       = Number(rcEl("rcVaFee").value||0)/100;
+    var br       = Number(rcEl("rcBondReturn").value||0)/100;
+    var priority = rcEl("rcPriority").value;
+    var goal     = rcEl("rcGoal").value;
+    var retireAge  = Number(rcEl("rcRetireAge").value||65);
+    var incomeMode = rcEl("rcIncomeMode").value;
+    var payoutRate = Number(rcEl("rcPayoutRate").value||5)/100;
+    var incomeYears= Number(rcEl("rcIncomeYears").value||25);
 
-    const cap = Number($("capRate").value||0)/100;
-    const avgMarket = Number($("marketReturn").value||0)/100;
-    const infl = Number($("inflation").value||0)/100;
-    const mgmtFee = Number($("mgmtFee").value||0)/100;
-    const fixedRate = Number($("fixedRate").value||0)/100;
-    const vaFee = Number($("vaFee").value||0)/100;
-    const bondReturn = Number($("bondReturn").value||0)/100;
+    var ms = rcBuildMarketSeries(years, avgMkt, rcState.stress);
+    var params = {cap:cap, ms:ms, mf:mf, fr:fr, vf:vf, br:br};
+    var selected = Array.from(rcState.picks);
 
-    const priority = $("priority").value;
-    const goal = $("goal").value;
-    const retireAge = Number($("retireAge").value||65);
-    const incomeMode = $("incomeMode").value;
-    const payoutRate = Number($("payoutRate").value||5)/100;
-    const incomeYears = Number($("incomeYears").value||25);
+    var sims = selected.map(function(k){ return Object.assign({key:k}, rcSimulatePlan(k,initial,years,params)); });
+    sims.sort(function(a,b){ return b.final-a.final; });
 
-    const marketSeries = buildMarketSeries(years, avgMarket, rcState.stress);
-    const params = { cap, marketSeries, mgmtFee, fixedRate, vaFee, bondReturn };
-    const selected = Array.from(rcState.picks);
-
-    const sims = selected.map(k => ({ key:k, ...simulatePlan(k, initial, years, params) }));
-    sims.sort((a,b)=>b.final - a.final);
-
-    const top = $("rcTopResults");
-    top.innerHTML = "";
-    sims.forEach(s=>{
-      const box = document.createElement("div");
-      const colorClass = planColor(s.key);
-      box.className = `rc-box ${colorClass}`;
-      box.innerHTML = `<h4>${planName(s.key)}</h4><div class="rc-val">${money(s.final)}</div>`;
+    // Result boxes
+    var top = rcEl("rcTopResults");
+    top.innerHTML="";
+    sims.forEach(function(s){
+      var box=document.createElement("div");
+      box.className="rc-box "+rcPlanColor(s.key);
+      box.innerHTML="<h4>"+rcPlanName(s.key)+"</h4><div class='rc-val'>"+rcMoney(s.final)+"</div>";
       top.appendChild(box);
     });
 
-    const best = sims[0];
-    let annualIncome = 0;
-    if(incomeMode==="rule4"){
-      annualIncome = best.final * 0.04;
-    }else{
-      annualIncome = best.final * payoutRate;
-    }
-    const monthly = annualIncome / 12;
-    const realFactor = 1 / Math.pow(1 + infl, years);
-    const monthlyReal = monthly * realFactor;
+    // Income estimate
+    var best=sims[0];
+    var annual = incomeMode==="rule4" ? best.final*0.04 : best.final*payoutRate;
+    var monthly = annual/12;
+    var monthlyReal = monthly / Math.pow(1+infl, years);
+    rcEl("rcMonthlyIncome").textContent = rcMoney(monthly);
+    rcEl("rcMonthlyIncomeReal").textContent = rcMoney(monthlyReal);
 
-    $("monthlyIncome").textContent = money(monthly);
-    $("monthlyIncomeReal").textContent = money(monthlyReal);
-
-    const expertType = (()=>{
-      if(priority==="income") return "Guaranteed Income Specialist";
+    // CTA
+    var expertType = (function(){
+      if(priority==="income")     return "Guaranteed Income Specialist";
       if(priority==="protection") return "Principal Protection (FIA/Fixed) Specialist";
-      if(priority==="growth") return "Growth & Allocation Retirement Strategist";
-      if(priority==="tax") return "Tax-Aware Retirement Planner";
-      if(priority==="legacy") return "Legacy & Beneficiary Planning Specialist";
+      if(priority==="growth")     return "Growth & Allocation Retirement Strategist";
+      if(priority==="tax")        return "Tax-Aware Retirement Planner";
+      if(priority==="legacy")     return "Legacy & Beneficiary Planning Specialist";
       return "Retirement Planning Specialist";
     })();
+    var lines=[];
+    lines.push("Based on your inputs, <strong>"+rcPlanName(best.key)+"</strong> projected highest under the selected scenario ("+rcState.stress+").");
+    if(priority==="protection") lines.push("You prioritized <strong>principal protection</strong>, which often aligns with fixed or indexed annuity strategies.");
+    if(priority==="income")     lines.push("You prioritized <strong>guaranteed income</strong>, so we'll match you with an income-focused annuity expert.");
+    if(priority==="growth")     lines.push("You prioritized <strong>growth</strong>, so we'll match you with someone who can compare capped protection vs. market allocation.");
+    if(goal==="rates")          lines.push("You selected <strong>finding the best annuity rates</strong>, so we'll match you with an expert who tracks competitive rate environments.");
+    lines.push("We'll match you with a <strong>"+expertType+"</strong> licensed in your area"+(state?" ("+state.toUpperCase()+")":"")+". ");
+    rcEl("ctaBody").innerHTML = lines.join(" ");
 
-    const why = (()=>{
-      const topName = planName(best.key);
-      const keyLines = [];
-      keyLines.push(`Based on your inputs, <strong>${topName}</strong> projected highest under the selected scenario (${rcState.stress}).`);
-      if(priority==="protection") keyLines.push("You prioritized <strong>principal protection</strong>, which often aligns with fixed or indexed annuity strategies.");
-      if(priority==="income") keyLines.push("You prioritized <strong>guaranteed income</strong>, so we'll match you with an income-focused annuity expert.");
-      if(priority==="growth") keyLines.push("You prioritized <strong>growth</strong>, so we'll match you with someone who can compare capped protection vs. market allocation.");
-      if(goal==="rates") keyLines.push("You selected <strong>finding the best annuity rates</strong>, so we'll match you with an expert who tracks competitive rate environments.");
-      keyLines.push(`We'll match you with a <strong>${expertType}</strong> licensed in your area${state ? " ("+state.toUpperCase()+")" : ""}.`);
-      return keyLines.join(" ");
-    })();
-
-    $("ctaBody").innerHTML = why;
-
-    const qp = new URLSearchParams({
-      amount: initial,
-      years: years,
-      age: age,
-      state: state,
-      stress: rcState.stress,
-      picks: selected.join(","),
-      best: best.key,
-      capRate: (cap*100).toFixed(2),
-      marketReturn: (avgMarket*100).toFixed(2),
-      mgmtFee: (mgmtFee*100).toFixed(2),
-      fixedRate: (fixedRate*100).toFixed(2),
-      vaFee: (vaFee*100).toFixed(2),
-      bondReturn: (bondReturn*100).toFixed(2),
-      inflation: (infl*100).toFixed(2),
-      priority: $("priority").value,
-      goal: $("goal").value,
-      retireAge: retireAge,
-      incomeMode: incomeMode,
-      payoutRate: (payoutRate*100).toFixed(2),
-      incomeYears: incomeYears,
-      estMonthly: monthly.toFixed(2),
-      estMonthlyReal: monthlyReal.toFixed(2)
+    var qp = new URLSearchParams({
+      amount:initial, years:years, age:age, state:state, stress:rcState.stress,
+      picks:selected.join(","), best:best.key,
+      capRate:(cap*100).toFixed(2), marketReturn:(avgMkt*100).toFixed(2),
+      mgmtFee:(mf*100).toFixed(2), fixedRate:(fr*100).toFixed(2),
+      vaFee:(vf*100).toFixed(2), bondReturn:(br*100).toFixed(2),
+      inflation:(infl*100).toFixed(2), priority:priority, goal:goal,
+      retireAge:retireAge, incomeMode:incomeMode,
+      payoutRate:(payoutRate*100).toFixed(2), incomeYears:incomeYears,
+      estMonthly:monthly.toFixed(2), estMonthlyReal:monthlyReal.toFixed(2)
     });
-    $("ctaLink").href = `${EXPERT_MATCH_URL}?${qp.toString()}`;
+    rcEl("ctaLink").href = EXPERT_MATCH_URL+"?"+qp.toString();
 
-    renderBarCompare(sims);
-    renderGrowthChart(sims.slice(0,2), years);
-    renderInflationChart(years, infl);
-    renderSummaryTable(selected, priority);
-
+    rcRenderBars(sims);
+    rcRenderGrowth(sims.slice(0,2), years);
+    rcRenderInflation(years, infl);
+    rcRenderTable(selected, priority);
     showStep(4);
   }
 
-  function renderBarCompare(sims){
-    const barArea = $("barArea");
-    barArea.innerHTML = "";
-    const maxVal = Math.max(...sims.map(s=>s.final));
-    sims.forEach(s=>{
-      const pct = maxVal ? (s.final/maxVal)*100 : 0;
-      const row = document.createElement("div");
-      row.className = "rc-barRow";
-
-      const lbl = document.createElement("div");
-      lbl.className = "rc-barLbl";
-      lbl.textContent = planName(s.key).replace(" (FIA)","");
-
-      const bg = document.createElement("div");
-      bg.className = "rc-barBg";
-
-      const fill = document.createElement("div");
-      fill.className = "rc-barFill";
-      fill.style.width = clamp(pct,0,100)+"%";
-      fill.style.background = (planColor(s.key)==="green") ? "var(--green)" : (planColor(s.key)==="red") ? "var(--red)" : "var(--blue)";
-
+  function rcRenderBars(sims){
+    var area=rcEl("barArea"); area.innerHTML="";
+    var maxV=Math.max.apply(null, sims.map(function(s){return s.final;}));
+    sims.forEach(function(s){
+      var pct=maxV?(s.final/maxV)*100:0;
+      var row=document.createElement("div"); row.className="rc-barRow";
+      var lbl=document.createElement("div"); lbl.className="rc-barLbl"; lbl.textContent=rcPlanName(s.key).replace(" (FIA)","");
+      var bg=document.createElement("div"); bg.className="rc-barBg";
+      var fill=document.createElement("div"); fill.className="rc-barFill";
+      fill.style.width=rcClamp(pct,0,100)+"%";
+      fill.style.background=rcPlanColor(s.key)==="green"?"var(--green)":rcPlanColor(s.key)==="red"?"var(--red)":"var(--blue)";
       bg.appendChild(fill);
-
-      const val = document.createElement("div");
-      val.className = "rc-barVal";
-      val.textContent = money(s.final);
-
-      row.appendChild(lbl);
-      row.appendChild(bg);
-      row.appendChild(val);
-      barArea.appendChild(row);
+      var val=document.createElement("div"); val.className="rc-barVal"; val.textContent=rcMoney(s.final);
+      row.appendChild(lbl); row.appendChild(bg); row.appendChild(val);
+      area.appendChild(row);
     });
   }
 
-  function renderGrowthChart(topTwo, years){
-    const chart = $("growthChart");
-    chart.innerHTML = "";
+  function rcRenderGrowth(topTwo, years){
+    var chart=rcEl("growthChart"); chart.innerHTML="";
     if(topTwo.length<2) return;
-
-    const s1 = topTwo[0], s2 = topTwo[1];
-    const maxV = Math.max(...s1.series, ...s2.series);
-
-    for(let i=0;i<=years;i++){
-      const col = document.createElement("div");
-      col.className = "rc-yearCol";
-      col.title = `Year ${i}\n${planName(s1.key)}: ${money(s1.series[i])}\n${planName(s2.key)}: ${money(s2.series[i])}`;
-
-      const pair = document.createElement("div");
-      pair.className = "rc-barPair";
-
-      const h1 = maxV ? (s1.series[i]/maxV)*110 : 0;
-      const h2 = maxV ? (s2.series[i]/maxV)*110 : 0;
-
-      const b1 = document.createElement("div");
-      b1.className = "rc-b g";
-      b1.style.height = clamp(h1,0,110)+"px";
-
-      const b2 = document.createElement("div");
-      b2.className = "rc-b r";
-      b2.style.height = clamp(h2,0,110)+"px";
-
-      pair.appendChild(b1);
-      pair.appendChild(b2);
-
-      const lbl = document.createElement("div");
-      lbl.className = "rc-yearLbl";
-      lbl.textContent = i;
-
-      col.appendChild(pair);
-      col.appendChild(lbl);
+    var s1=topTwo[0], s2=topTwo[1];
+    var maxV=Math.max.apply(null, s1.series.concat(s2.series));
+    for(var i=0;i<=years;i++){
+      var col=document.createElement("div"); col.className="rc-yearCol";
+      col.title="Year "+i+"\n"+rcPlanName(s1.key)+": "+rcMoney(s1.series[i])+"\n"+rcPlanName(s2.key)+": "+rcMoney(s2.series[i]);
+      var pair=document.createElement("div"); pair.className="rc-barPair";
+      var h1=maxV?(s1.series[i]/maxV)*110:0;
+      var h2=maxV?(s2.series[i]/maxV)*110:0;
+      var b1=document.createElement("div"); b1.className="rc-b g"; b1.style.height=rcClamp(h1,0,110)+"px";
+      var b2=document.createElement("div"); b2.className="rc-b r"; b2.style.height=rcClamp(h2,0,110)+"px";
+      pair.appendChild(b1); pair.appendChild(b2);
+      var lbl=document.createElement("div"); lbl.className="rc-yearLbl"; lbl.textContent=i;
+      col.appendChild(pair); col.appendChild(lbl);
       chart.appendChild(col);
     }
   }
 
-  function renderInflationChart(years, infl){
-    const chart = $("inflationChart");
-    chart.innerHTML = "";
-    const maxH = 90;
-    for(let i=0;i<=years;i++){
-      const power = 1/Math.pow(1+infl, i);
-      const h = clamp(power*maxH, 0, maxH);
-
-      const col = document.createElement("div");
-      col.className = "rc-yearCol";
-      col.title = `Year ${i}\n$1 becomes ${money(power)} of today's value`;
-
-      const bar = document.createElement("div");
-      bar.className = "rc-b i";
-      bar.style.height = h+"px";
-
-      const lbl = document.createElement("div");
-      lbl.className = "rc-yearLbl";
-      lbl.textContent = i;
-
-      col.appendChild(bar);
-      col.appendChild(lbl);
+  function rcRenderInflation(years, infl){
+    var chart=rcEl("inflationChart"); chart.innerHTML="";
+    for(var i=0;i<=years;i++){
+      var power=1/Math.pow(1+infl,i);
+      var h=rcClamp(power*90,0,90);
+      var col=document.createElement("div"); col.className="rc-yearCol";
+      col.title="Year "+i+"\n$1 = "+rcMoney(power)+" today";
+      var bar=document.createElement("div"); bar.className="rc-b i"; bar.style.height=h+"px";
+      var lbl=document.createElement("div"); lbl.className="rc-yearLbl"; lbl.textContent=i;
+      col.appendChild(bar); col.appendChild(lbl);
       chart.appendChild(col);
     }
   }
 
-  function renderSummaryTable(selected, priority){
-    const t = $("summaryTable");
-    const headers = ["Feature"].concat(selected.map(planName));
-    const rows = [];
-
-    const feature = (name, map)=>[name, ...selected.map(k=>map[k]||"—")];
-
-    rows.push(feature("Downside Risk",{
-      fia:`<span class="rc-badge good">Protected</span>`,
-      fixed:`<span class="rc-badge good">Protected</span>`,
-      variable:`<span class="rc-badge mid">Market-linked</span>`,
-      mf:`<span class="rc-badge bad">Market-linked</span>`,
-      bonds:`<span class="rc-badge mid">Lower risk</span>`
-    }));
-    rows.push(feature("Fees/Costs",{
-      fia:`<span class="rc-badge mid">Varies</span>`,
-      fixed:`<span class="rc-badge good">Low</span>`,
-      variable:`<span class="rc-badge bad">Higher</span>`,
-      mf:`<span class="rc-badge mid">Mgmt fee</span>`,
-      bonds:`<span class="rc-badge mid">Low-mid</span>`
-    }));
-    rows.push(feature("Growth Upside",{
-      fia:`<span class="rc-badge mid">Capped</span>`,
-      fixed:`<span class="rc-badge bad">Lower</span>`,
-      variable:`<span class="rc-badge good">Higher</span>`,
-      mf:`<span class="rc-badge good">Higher</span>`,
-      bonds:`<span class="rc-badge bad">Lower</span>`
-    }));
-    rows.push(feature("Income Options",{
-      fia:`<span class="rc-badge good">Strong</span>`,
-      fixed:`<span class="rc-badge good">Strong</span>`,
-      variable:`<span class="rc-badge mid">Possible</span>`,
-      mf:`<span class="rc-badge bad">No guarantee</span>`,
-      bonds:`<span class="rc-badge bad">No guarantee</span>`
-    }));
-    rows.push(feature("Inflation Handling",{
-      fia:`<span class="rc-badge mid">Depends</span>`,
-      fixed:`<span class="rc-badge bad">Weaker</span>`,
-      variable:`<span class="rc-badge good">Better</span>`,
-      mf:`<span class="rc-badge good">Better</span>`,
-      bonds:`<span class="rc-badge mid">Moderate</span>`
-    }));
-
-    let html = "<tr>" + headers.map(h=>`<th>${h}</th>`).join("") + "</tr>";
-    html += rows.map(r=>"<tr>"+r.map((c,i)=> i===0 ? `<td style="font-weight:900;">${c}</td>` : `<td>${c}</td>`).join("")+"</tr>").join("");
-    t.innerHTML = html;
+  function rcRenderTable(selected, priority){
+    var t=rcEl("summaryTable");
+    var headers=["Feature"].concat(selected.map(rcPlanName));
+    var feat=function(name,map){ return [name].concat(selected.map(function(k){return map[k]||"—";})); };
+    var rows=[
+      feat("Downside Risk",{fia:'<span class="rc-badge good">Protected</span>',fixed:'<span class="rc-badge good">Protected</span>',variable:'<span class="rc-badge mid">Market-linked</span>',mf:'<span class="rc-badge bad">Market-linked</span>',bonds:'<span class="rc-badge mid">Lower risk</span>'}),
+      feat("Fees/Costs",{fia:'<span class="rc-badge mid">Varies</span>',fixed:'<span class="rc-badge good">Low</span>',variable:'<span class="rc-badge bad">Higher</span>',mf:'<span class="rc-badge mid">Mgmt fee</span>',bonds:'<span class="rc-badge mid">Low-mid</span>'}),
+      feat("Growth Upside",{fia:'<span class="rc-badge mid">Capped</span>',fixed:'<span class="rc-badge bad">Lower</span>',variable:'<span class="rc-badge good">Higher</span>',mf:'<span class="rc-badge good">Higher</span>',bonds:'<span class="rc-badge bad">Lower</span>'}),
+      feat("Income Options",{fia:'<span class="rc-badge good">Strong</span>',fixed:'<span class="rc-badge good">Strong</span>',variable:'<span class="rc-badge mid">Possible</span>',mf:'<span class="rc-badge bad">No guarantee</span>',bonds:'<span class="rc-badge bad">No guarantee</span>'}),
+      feat("Inflation Handling",{fia:'<span class="rc-badge mid">Depends</span>',fixed:'<span class="rc-badge bad">Weaker</span>',variable:'<span class="rc-badge good">Better</span>',mf:'<span class="rc-badge good">Better</span>',bonds:'<span class="rc-badge mid">Moderate</span>'})
+    ];
+    var html="<tr>"+headers.map(function(h){return "<th>"+h+"</th>";}).join("")+"</tr>";
+    html+=rows.map(function(r){
+      return "<tr>"+r.map(function(c,i){ return i===0?"<td style='font-weight:900;'>"+c+"</td>":"<td>"+c+"</td>"; }).join("")+"</tr>";
+    }).join("");
+    t.innerHTML=html;
   }
 
-  // ========= INIT =========
-  // FIX: Removed window.addEventListener("DOMContentLoaded", ...) wrapper.
-  // GHL embeds inject HTML into an already-loaded page, so DOMContentLoaded
-  // has already fired — the callback would never run, leaving all navigation
-  // buttons without click handlers. Since this <script> tag appears after the
-  // HTML elements, the DOM is ready and we can initialise immediately.
-  (function rcInit() {
-    $("pick_fia").checked = true;
-    $("pick_mf").checked = true;
-
-    const bind = (id, fn) => {
-      const el = $(id);
-      if (el) el.addEventListener("click", fn);
-    };
-
-    bind("btnNext1",  () => rcNext(1));
-    bind("btnBack2",  () => rcBack(2));
-    bind("btnNext2",  () => rcNext(2));
-    bind("btnBack3",  () => rcBack(3));
-    bind("btnNext3",  () => rcNext(3));
-    bind("btnBack4",  () => rcBack(4));  // CTA section back button
-    bind("btnBack4b", () => rcBack(4)); // FIX: bottom back button (was duplicate id, now btnBack4b)
-    bind("btnRestart",() => rcRestart());
-
-    // FIX: Attach plan-toggle clicks here (inline onclick removed from labels
-    // to prevent double-invocation when DOMContentLoaded was also wiring them up).
-    ["fia","fixed","variable","mf","bonds"].forEach(k => {
-      const cb = $("pick_" + k);
-      if (cb) {
-        const label = cb.closest(".rc-choice");
-        if (label) {
-          label.addEventListener("click", (e) => {
-            // The browser already toggles the checkbox when the label is
-            // clicked (because the checkbox is a descendant). Only manually
-            // flip it if the click target was NOT the checkbox itself.
-            if (e.target.tagName.toLowerCase() !== "input") {
-              cb.checked = !cb.checked;
-            }
-            rcTogglePlan(k);
-          });
-        }
-      }
-    });
-
-    updateChoiceStyles();
+  // ========= DEFAULTS =========
+  // Set default checkbox states. This runs immediately since the <script>
+  // block is below the HTML it references. No DOMContentLoaded needed.
+  (function(){
+    var fia = rcEl("pick_fia");
+    var mf  = rcEl("pick_mf");
+    if(fia){ fia.checked=true; rcState.picks.add("fia"); }
+    if(mf){  mf.checked=true;  rcState.picks.add("mf");  }
+    rcUpdateChoiceStyles();
   })();
 </script>
 

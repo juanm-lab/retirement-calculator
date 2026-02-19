@@ -88,7 +88,7 @@
   }
   .rc-yearCol{display:flex; flex-direction:column; align-items:center; width:20px; gap:6px;}
   .rc-barPair{display:flex; gap:3px; align-items:flex-end; height:110px;}
-  .rc-b{width:7px; border-radius:8px;}
+  .rc-b{display:block; width:7px; border-radius:8px; flex-shrink:0;}
   .rc-b.g{background:var(--green);}
   .rc-b.r{background:var(--red);}
   .rc-b.i{background:var(--blue); width:10px;}
@@ -406,8 +406,6 @@
     ["step1","step2","step3","step4"].forEach(function(s,i){
       rcEl(s).style.display = (i+1===step) ? "block" : "none";
     });
-    var top = rcEl("rc").offsetTop - 20;
-    window.scrollTo({top: top < 0 ? 0 : top, behavior:"smooth"});
   }
 
   // Called by inline onclick on every nav button — no addEventListener needed.
@@ -629,8 +627,8 @@
       var pair=document.createElement("div"); pair.className="rc-barPair";
       var h1=maxV?(s1.series[i]/maxV)*110:0;
       var h2=maxV?(s2.series[i]/maxV)*110:0;
-      var b1=document.createElement("div"); b1.className="rc-b g"; b1.style.height=rcClamp(h1,0,110)+"px";
-      var b2=document.createElement("div"); b2.className="rc-b r"; b2.style.height=rcClamp(h2,0,110)+"px";
+      var b1=document.createElement("div"); b1.className="rc-b g"; b1.style.setProperty("height",rcClamp(h1,0,110)+"px","important");
+      var b2=document.createElement("div"); b2.className="rc-b r"; b2.style.setProperty("height",rcClamp(h2,0,110)+"px","important");
       pair.appendChild(b1); pair.appendChild(b2);
       var lbl=document.createElement("div"); lbl.className="rc-yearLbl"; lbl.textContent=i;
       col.appendChild(pair); col.appendChild(lbl);
@@ -645,7 +643,7 @@
       var h=rcClamp(power*90,0,90);
       var col=document.createElement("div"); col.className="rc-yearCol";
       col.title="Year "+i+"\n$1 = "+rcMoney(power)+" today";
-      var bar=document.createElement("div"); bar.className="rc-b i"; bar.style.height=h+"px";
+      var bar=document.createElement("div"); bar.className="rc-b i"; bar.style.setProperty("height",h+"px","important");
       var lbl=document.createElement("div"); lbl.className="rc-yearLbl"; lbl.textContent=i;
       col.appendChild(bar); col.appendChild(lbl);
       chart.appendChild(col);

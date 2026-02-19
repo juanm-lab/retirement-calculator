@@ -158,48 +158,49 @@
     <div class="rc-h3">Step 2 — Choose What To Compare (pick up to 3)</div>
 
     <div class="rc-grid-3" style="margin-top:10px;">
-      <!-- FIXED: inline onclick on label; pointer-events:none on checkbox so
-           only the label onclick fires (prevents the checkbox from also
-           triggering a second bubbled click to the label). -->
-      <label class="rc-choice" onclick="rcTogglePlan('fia')">
+      <!-- Using <div> not <label> so the browser never auto-toggles the
+           checkbox via label activation behavior. rcTogglePlan controls the
+           checkbox exclusively. pointer-events:none on the checkbox routes
+           clicks on it up to the parent div instead. -->
+      <div class="rc-choice" onclick="rcTogglePlan('fia')">
         <input type="checkbox" id="pick_fia">
         <div>
           <strong>Indexed Annuity (FIA)</strong>
           <small>Cap + principal protection (no losses in this model)</small>
         </div>
-      </label>
+      </div>
 
-      <label class="rc-choice" onclick="rcTogglePlan('fixed')">
+      <div class="rc-choice" onclick="rcTogglePlan('fixed')">
         <input type="checkbox" id="pick_fixed">
         <div>
           <strong>Fixed Annuity</strong>
           <small>Stable credited rate (lower upside, high certainty)</small>
         </div>
-      </label>
+      </div>
 
-      <label class="rc-choice" onclick="rcTogglePlan('variable')">
+      <div class="rc-choice" onclick="rcTogglePlan('variable')">
         <input type="checkbox" id="pick_variable">
         <div>
           <strong>Variable Annuity</strong>
           <small>Market-like returns, product costs (simplified)</small>
         </div>
-      </label>
+      </div>
 
-      <label class="rc-choice" onclick="rcTogglePlan('mf')">
+      <div class="rc-choice" onclick="rcTogglePlan('mf')">
         <input type="checkbox" id="pick_mf">
         <div>
           <strong>Mutual Fund</strong>
           <small>Market return minus management fees</small>
         </div>
-      </label>
+      </div>
 
-      <label class="rc-choice" onclick="rcTogglePlan('bonds')">
+      <div class="rc-choice" onclick="rcTogglePlan('bonds')">
         <input type="checkbox" id="pick_bonds">
         <div>
           <strong>Bond Portfolio</strong>
           <small>Lower return, smoother path (simplified)</small>
         </div>
-      </label>
+      </div>
 
       <div class="rc-card" style="border-style:dashed;">
         <div class="rc-label">Assumptions (adjust these)</div>

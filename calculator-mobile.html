@@ -202,6 +202,9 @@
        Helps diagnose GHL embed issues without needing browser dev tools. -->
   <div id="rcStatus" style="text-align:center;font-size:11px;color:#999;min-height:14px;margin-bottom:4px;"></div>
 
+  <!-- Anchor: panels are DOM-swapped in/out here so no CSS can keep them visible -->
+  <div id="rcPanelAnchor"></div>
+
   <!-- ===== STEP 1 ===== -->
   <div class="rc-step-pnl" id="rcStep1">
     <div class="rc-h3">Step 1 — Your Basics</div>
@@ -230,7 +233,9 @@
   </div>
 
   <!-- ===== STEP 2 ===== -->
-  <div class="rc-step-pnl rc-hidden" id="rcStep2">
+  <!-- Steps 2-4: inline display:none so they're hidden even before JS runs.
+       JS will physically remove them from the DOM immediately on init. -->
+  <div class="rc-step-pnl" id="rcStep2" style="display:none">
     <div class="rc-h3">Step 2 — Choose What To Compare</div>
     <div class="rc-note" style="text-align:center; margin-bottom:10px;">Pick 2 or 3 plans to compare</div>
 
@@ -335,7 +340,7 @@
   </div>
 
   <!-- ===== STEP 3 ===== -->
-  <div class="rc-step-pnl rc-hidden" id="rcStep3">
+  <div class="rc-step-pnl" id="rcStep3" style="display:none">
     <div class="rc-h3">Step 3 — What Matters Most?</div>
     <div class="rc-grid">
       <div>
@@ -388,7 +393,7 @@
   </div>
 
   <!-- ===== STEP 4 ===== -->
-  <div class="rc-step-pnl rc-hidden" id="rcStep4">
+  <div class="rc-step-pnl" id="rcStep4" style="display:none">
     <div class="rc-h3">Step 4 — Results</div>
 
     <div class="rc-resultBoxes" id="rcTopResults"></div>
@@ -448,6 +453,11 @@
     picks: new Set(["fia","mf"])
   };
 
+  // All four step panels, collected once in rcInit.
+  // showStep physically moves the active one in/out of the DOM so that
+  // no host-page CSS override can force a hidden panel to remain visible.
+  var rcPanels = [];
+
   // ========= HELPERS =========
   function rcEl(id){ return document.getElementById(id); }
   function rcMoney(n){ return "$"+Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
@@ -477,22 +487,37 @@
   function showStep(step){
     rcState.step = step;
     rcSetStepper(step);
-    var wrap = rcGetWrap();
-    // Scope to our container so we only affect the visible copy
-    // if GHL has duplicated the embed.
-    var scope = wrap || document;
-    var panels = scope.querySelectorAll(".rc-step-pnl");
-    rcDbg("showStep("+step+") panels:"+panels.length+" wrap:"+(wrap?"found":"null"));
-    if(!panels || panels.length===0){ return; }
-    panels.forEach(function(el, i){
-      if(i + 1 === step){
-        el.classList.remove("rc-hidden");
-        el.style.setProperty("display","block","important");
-      } else {
-        el.classList.add("rc-hidden");
-        el.style.setProperty("display","none","important");
-      }
+
+    var anchor = document.getElementById("rcPanelAnchor");
+
+    if(!anchor || rcPanels.length === 0){
+      // Fallback: CSS-only toggle when DOM-swap infrastructure isn't ready
+      var all = document.querySelectorAll(".rc-step-pnl");
+      all.forEach(function(el, i){
+        el.style.display = (i + 1 === step) ? "block" : "none";
+      });
+      return;
+    }
+
+    var parent = anchor.parentNode;
+
+    // Pull every panel out of the DOM (harmless if already detached)
+    rcPanels.forEach(function(el){
+      if(el.parentNode) el.parentNode.removeChild(el);
     });
+
+    // Re-insert only the target panel immediately after the anchor node
+    var target = rcPanels[step - 1];
+    if(target && parent){
+      parent.insertBefore(target, anchor.nextSibling);
+      // Clear any inline display:none that was in the original HTML
+      target.style.display = "";
+    }
+
+    // Wire any buttons that just entered the DOM
+    if(typeof rcBindStepBtns === "function") rcBindStepBtns();
+
+    var wrap = rcGetWrap();
     try{ (wrap||document.body).scrollIntoView({behavior:"smooth",block:"start"}); }catch(e){}
   }
 
@@ -787,41 +812,81 @@
   // listener on the whole calculator container so navigation works even
   // when GHL strips inline onclick attributes.
   function rcInit(){
-    // Checkbox defaults
+    // ---- Checkbox defaults ----
     var fia=rcEl("pick_fia"), mf=rcEl("pick_mf");
     if(fia){ fia.checked=true; rcState.picks.add("fia"); }
     if(mf){  mf.checked=true;  rcState.picks.add("mf");  }
     rcUpdateChoiceStyles();
 
-    // Layer 1: direct addEventListener by ID (works even if onclick/ontouchend stripped)
-    var btnMap = {
+    // ---- DOM-swap setup ----
+    // Collect all step panels into rcPanels[], then physically remove steps 2-4
+    // from the DOM. showStep() re-inserts whichever panel is needed.
+    // This makes navigation immune to any host-page CSS that might force
+    // display:block on arbitrary divs.
+    rcPanels = Array.from(document.querySelectorAll(".rc-step-pnl"));
+    var anchor = document.getElementById("rcPanelAnchor");
+    if(anchor && rcPanels.length > 0){
+      var ap = anchor.parentNode;
+      // Pull all panels out
+      rcPanels.forEach(function(el){ if(el.parentNode) el.parentNode.removeChild(el); });
+      // Put step 1 back, right after the anchor
+      if(ap && rcPanels[0]){
+        ap.insertBefore(rcPanels[0], anchor.nextSibling);
+        rcPanels[0].style.display = "";
+      }
+    }
+
+    // ---- Button wiring ----
+    // The handler function is shared by all delegation layers.
+    function rcHandleNav(name){
+      if(name==="nav-next-1")      rcNext(1);
+      else if(name==="nav-back-2") rcBack(2);
+      else if(name==="nav-next-2") rcNext(2);
+      else if(name==="nav-back-3") rcBack(3);
+      else if(name==="nav-next-3") rcNext(3);
+      else if(name==="nav-back-4") rcBack(4);
+      else if(name==="nav-restart")rcRestart();
+    }
+
+    // Layer 1: direct addEventListener on step-1 buttons (they're in the DOM now)
+    // Steps 2-4 buttons are not in the DOM yet, so rcBindStepBtns() attaches
+    // their listeners each time showStep inserts a new panel.
+    rcBindStepBtns();
+
+    // Layer 2: delegation on the wrap container
+    var wrap = rcGetWrap();
+    if(wrap){
+      wrap.addEventListener("click", function(e){
+        var btn = e.target && e.target.closest ? e.target.closest("button[name]") : null;
+        if(!btn) return;
+        rcHandleNav(btn.getAttribute("name"));
+      });
+    }
+
+    // Layer 3: document-level delegation — deepest fallback if wrap is null
+    // or event propagation to wrap is blocked by host-page scripts.
+    document.addEventListener("click", function(e){
+      var btn = e.target && e.target.closest ? e.target.closest("button[id^='rcB']") : null;
+      if(!btn) return;
+      rcHandleNav(btn.getAttribute("name")||"");
+    });
+  }
+
+  // Attach click listeners directly to any nav buttons currently in the DOM.
+  // Called after each panel swap so the newly inserted panel's buttons are wired.
+  var _rcBound = {}; // track which IDs already have a listener
+  function rcBindStepBtns(){
+    var map = {
       rcBN1:function(){ rcNext(1); },
       rcBB2:function(){ rcBack(2); }, rcBN2:function(){ rcNext(2); },
       rcBB3:function(){ rcBack(3); }, rcBN3:function(){ rcNext(3); },
       rcBB4:function(){ rcBack(4); }, rcBRS:function(){ rcRestart(); }
     };
-    Object.keys(btnMap).forEach(function(id){
+    Object.keys(map).forEach(function(id){
+      if(_rcBound[id]) return; // already bound
       var el = document.getElementById(id);
-      if(el) el.addEventListener("click", btnMap[id]);
+      if(el){ el.addEventListener("click", map[id]); _rcBound[id]=true; }
     });
-
-    // Layer 2: event delegation on container by name attr (deepest fallback)
-    var wrap = rcGetWrap();
-    if(wrap){
-      wrap.addEventListener("click", function(e){
-        var btn = e.target.closest("button[name]");
-        if(!btn) return;
-        var n = btn.getAttribute("name");
-        if(n==="nav-next-1"){ rcNext(1); }
-        else if(n==="nav-back-2"){ rcBack(2); }
-        else if(n==="nav-next-2"){ rcNext(2); }
-        else if(n==="nav-back-3"){ rcBack(3); }
-        else if(n==="nav-next-3"){ rcNext(3); }
-        else if(n==="nav-back-4"){ rcBack(4); }
-        else if(n==="nav-restart"){ rcRestart(); }
-      });
-    }
-    rcDbg("init ok — wrap:"+(wrap?"found":"null"));
   }
 
   // DOMContentLoaded-safe: if GHL moves the <script> to <head>,

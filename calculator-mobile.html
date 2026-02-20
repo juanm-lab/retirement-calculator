@@ -156,6 +156,13 @@
   .rc-badge.bad{ background:#fff1f1; color:#a61b1b; }
   .rc-badge.mid{ background:#fff7e6; color:#8b5a00; }
 
+  /* ---- Step heading ---- */
+  .rc-h3{ margin:0 0 10px; text-align:center; font-size:19px; font-weight:900; color:#111; }
+  .rc-center{ text-align:center; }
+
+  /* ---- Step visibility — class-based so GHL can't strip it ---- */
+  .rc-hidden{ display:none !important; }
+
   /* ---- Monthly income display ---- */
   .rc-incomeVal{ font-size:34px; font-weight:900; color:var(--ink); margin-top:4px; }
 
@@ -209,13 +216,13 @@
       </div>
     </div>
     <div class="rc-nav-end">
-      <button class="rc-btn" onclick="rcNext(1)">Next →</button>
+      <button type="button" class="rc-btn" onclick="rcNext(1)">Next →</button>
     </div>
     <div class="rc-note" style="margin-top:12px;">Tip: People searching "best annuity rates" usually want side-by-side comparisons. You'll get those in Step 2.</div>
   </div>
 
   <!-- ===== STEP 2 ===== -->
-  <div id="step2" style="display:none;">
+  <div id="step2" class="rc-hidden">
     <div class="rc-h3">Step 2 — Choose What To Compare</div>
     <div class="rc-note" style="text-align:center; margin-bottom:10px;">Pick 2 or 3 plans to compare</div>
 
@@ -314,13 +321,13 @@
     </div>
 
     <div class="rc-nav">
-      <button class="rc-btn ghost" onclick="rcBack(2)">← Back</button>
-      <button class="rc-btn" onclick="rcNext(2)">Next →</button>
+      <button type="button" class="rc-btn ghost" onclick="rcBack(2)">← Back</button>
+      <button type="button" class="rc-btn" onclick="rcNext(2)">Next →</button>
     </div>
   </div>
 
   <!-- ===== STEP 3 ===== -->
-  <div id="step3" style="display:none;">
+  <div id="step3" class="rc-hidden">
     <div class="rc-h3">Step 3 — What Matters Most?</div>
     <div class="rc-grid">
       <div>
@@ -367,13 +374,13 @@
       </div>
     </div>
     <div class="rc-nav">
-      <button class="rc-btn ghost" onclick="rcBack(3)">← Back</button>
-      <button class="rc-btn" onclick="rcNext(3)">See Results →</button>
+      <button type="button" class="rc-btn ghost" onclick="rcBack(3)">← Back</button>
+      <button type="button" class="rc-btn" onclick="rcNext(3)">See Results →</button>
     </div>
   </div>
 
   <!-- ===== STEP 4 ===== -->
-  <div id="step4" style="display:none;">
+  <div id="step4" class="rc-hidden">
     <div class="rc-h3">Step 4 — Results</div>
 
     <div class="rc-resultBoxes" id="rcTopResults"></div>
@@ -416,8 +423,8 @@
     </div>
 
     <div class="rc-nav" style="margin-top:16px;">
-      <button class="rc-btn ghost" onclick="rcBack(4)">← Back</button>
-      <button class="rc-btn secondary" onclick="rcRestart()">Start Over</button>
+      <button type="button" class="rc-btn ghost" onclick="rcBack(4)">← Back</button>
+      <button type="button" class="rc-btn secondary" onclick="rcRestart()">Start Over</button>
     </div>
   </div>
 </div>
@@ -448,9 +455,12 @@
     rcState.step = step;
     rcSetStepper(step);
     ["step1","step2","step3","step4"].forEach(function(s,i){
-      rcEl(s).style.display = (i+1===step) ? "block" : "none";
+      var el = rcEl(s);
+      if(!el) return;
+      if(i+1===step){ el.classList.remove("rc-hidden"); }
+      else           { el.classList.add("rc-hidden");    }
     });
-    rcEl("rc").scrollIntoView({behavior:"smooth", block:"start"});
+    try{ rcEl("rc").scrollIntoView({behavior:"smooth", block:"start"}); }catch(e){}
   }
 
   function rcNext(from){

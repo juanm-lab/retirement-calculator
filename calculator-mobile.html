@@ -195,7 +195,7 @@
   </div>
 
   <!-- ===== STEP 1 ===== -->
-  <div id="step1">
+  <div id="rcStep1">
     <div class="rc-h3">Step 1 — Your Basics</div>
     <div class="rc-grid">
       <div>
@@ -218,11 +218,11 @@
     <div class="rc-nav-end">
       <button type="button" class="rc-btn" onclick="rcNext(1)">Next →</button>
     </div>
-    <div class="rc-note" style="margin-top:12px;">Tip: People searching "best annuity rates" usually want side-by-side comparisons. You'll get those in Step 2.</div>
+    <div class="rc-note" style="margin-top:12px;">Tip: You will be able to compare multiple different retirement strategies and rates to see which one suits you best.</div>
   </div>
 
   <!-- ===== STEP 2 ===== -->
-  <div id="step2" class="rc-hidden">
+  <div id="rcStep2" class="rc-hidden">
     <div class="rc-h3">Step 2 — Choose What To Compare</div>
     <div class="rc-note" style="text-align:center; margin-bottom:10px;">Pick 2 or 3 plans to compare</div>
 
@@ -327,7 +327,7 @@
   </div>
 
   <!-- ===== STEP 3 ===== -->
-  <div id="step3" class="rc-hidden">
+  <div id="rcStep3" class="rc-hidden">
     <div class="rc-h3">Step 3 — What Matters Most?</div>
     <div class="rc-grid">
       <div>
@@ -380,7 +380,7 @@
   </div>
 
   <!-- ===== STEP 4 ===== -->
-  <div id="step4" class="rc-hidden">
+  <div id="rcStep4" class="rc-hidden">
     <div class="rc-h3">Step 4 — Results</div>
 
     <div class="rc-resultBoxes" id="rcTopResults"></div>
@@ -454,7 +454,7 @@
   function showStep(step){
     rcState.step = step;
     rcSetStepper(step);
-    ["step1","step2","step3","step4"].forEach(function(s,i){
+    ["rcStep1","rcStep2","rcStep3","rcStep4"].forEach(function(s,i){
       var el = rcEl(s);
       if(!el) return;
       if(i+1===step){ el.classList.remove("rc-hidden"); }

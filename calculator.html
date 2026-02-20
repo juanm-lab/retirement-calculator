@@ -83,11 +83,11 @@
   .rc-barVal{width:150px; text-align:right; font-weight:900;}
 
   .rc-miniChart{
-    display:flex; gap:6px; align-items:flex-end; height:150px; padding:12px; background:#fff; border-radius:12px;
+    display:flex; gap:6px; align-items:flex-end; height:225px; padding:12px; background:#fff; border-radius:12px;
     overflow-x:auto; border:1px solid var(--border);
   }
   .rc-yearCol{display:flex; flex-direction:column; align-items:center; width:20px; gap:6px;}
-  .rc-barPair{display:flex; gap:3px; align-items:flex-end; height:110px;}
+  .rc-barPair{display:flex; gap:3px; align-items:flex-end; height:165px;}
   .rc-b{display:block; width:7px; border-radius:8px; flex-shrink:0;}
   .rc-b.g{background:var(--green);}
   .rc-b.r{background:var(--red);}
@@ -323,10 +323,6 @@
     <div class="rc-center">
       <div style="font-weight:900; font-size:16px; color:#111;">Estimated Monthly Income</div>
       <div id="rcMonthlyIncome" style="font-size:36px; font-weight:900; color:var(--ink); margin-top:6px;">—</div>
-      <div style="margin-top:10px; color:var(--muted);">
-        Inflation-adjusted monthly income at retirement:
-        <span id="rcMonthlyIncomeReal" style="font-weight:900; color:#111;">—</span>
-      </div>
     </div>
 
     <!-- CTA block -->
@@ -339,7 +335,6 @@
           Find My Expert Match →
         </a>
       </div>
-      <div class="rc-note">We'll pre-fill your inputs on the next page so it feels customized.</div>
     </div>
 
     <div class="rc-hr"></div>
@@ -356,12 +351,6 @@
       <div style="font-weight:900; margin-bottom:8px;">Growth Over Time (Year-by-Year)</div>
       <div class="rc-miniChart" id="growthChart"></div>
       <div class="rc-note">Each year shows your top 2 selected plans (green/red) for quick comparison.</div>
-    </div>
-
-    <div style="margin-top:16px;">
-      <div style="font-weight:900; margin-bottom:8px;">Inflation Decay Curve (Purchasing Power of $1)</div>
-      <div class="rc-miniChart" id="inflationChart" style="height:120px;"></div>
-      <div class="rc-note">Bars shrink as inflation compounds.</div>
     </div>
 
     <div class="rc-hr"></div>
@@ -556,9 +545,7 @@
     var best=sims[0];
     var annual = incomeMode==="rule4" ? best.final*0.04 : best.final*payoutRate;
     var monthly = annual/12;
-    var monthlyReal = monthly / Math.pow(1+infl, years);
     rcEl("rcMonthlyIncome").textContent = rcMoney(monthly);
-    rcEl("rcMonthlyIncomeReal").textContent = rcMoney(monthlyReal);
 
     // CTA
     var expertType = (function(){
@@ -587,13 +574,12 @@
       inflation:(infl*100).toFixed(2), priority:priority, goal:goal,
       retireAge:retireAge, incomeMode:incomeMode,
       payoutRate:(payoutRate*100).toFixed(2), incomeYears:incomeYears,
-      estMonthly:monthly.toFixed(2), estMonthlyReal:monthlyReal.toFixed(2)
+      estMonthly:monthly.toFixed(2)
     });
     rcEl("ctaLink").href = EXPERT_MATCH_URL+"?"+qp.toString();
 
     rcRenderBars(sims);
     rcRenderGrowth(sims.slice(0,2), years);
-    rcRenderInflation(years, infl);
     rcRenderTable(selected, priority);
     showStep(4);
   }
@@ -625,27 +611,13 @@
       var col=document.createElement("div"); col.className="rc-yearCol";
       col.title="Year "+i+"\n"+rcPlanName(s1.key)+": "+rcMoney(s1.series[i])+"\n"+rcPlanName(s2.key)+": "+rcMoney(s2.series[i]);
       var pair=document.createElement("div"); pair.className="rc-barPair";
-      var h1=maxV?(s1.series[i]/maxV)*110:0;
-      var h2=maxV?(s2.series[i]/maxV)*110:0;
-      var b1=document.createElement("div"); b1.className="rc-b g"; b1.style.setProperty("height",rcClamp(h1,0,110)+"px","important");
-      var b2=document.createElement("div"); b2.className="rc-b r"; b2.style.setProperty("height",rcClamp(h2,0,110)+"px","important");
+      var h1=maxV?(s1.series[i]/maxV)*165:0;
+      var h2=maxV?(s2.series[i]/maxV)*165:0;
+      var b1=document.createElement("div"); b1.className="rc-b g"; b1.style.setProperty("height",rcClamp(h1,0,165)+"px","important");
+      var b2=document.createElement("div"); b2.className="rc-b r"; b2.style.setProperty("height",rcClamp(h2,0,165)+"px","important");
       pair.appendChild(b1); pair.appendChild(b2);
       var lbl=document.createElement("div"); lbl.className="rc-yearLbl"; lbl.textContent=i;
       col.appendChild(pair); col.appendChild(lbl);
-      chart.appendChild(col);
-    }
-  }
-
-  function rcRenderInflation(years, infl){
-    var chart=rcEl("inflationChart"); chart.innerHTML="";
-    for(var i=0;i<=years;i++){
-      var power=1/Math.pow(1+infl,i);
-      var h=rcClamp(power*90,0,90);
-      var col=document.createElement("div"); col.className="rc-yearCol";
-      col.title="Year "+i+"\n$1 = "+rcMoney(power)+" today";
-      var bar=document.createElement("div"); bar.className="rc-b i"; bar.style.setProperty("height",h+"px","important");
-      var lbl=document.createElement("div"); lbl.className="rc-yearLbl"; lbl.textContent=i;
-      col.appendChild(bar); col.appendChild(lbl);
       chart.appendChild(col);
     }
   }

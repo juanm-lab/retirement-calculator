@@ -74,6 +74,9 @@
     min-height:52px; line-height:1;
     /* prevent double-tap zoom */
     touch-action:manipulation;
+    /* sit above any host-page overlay that could swallow taps */
+    position:relative; z-index:10;
+    pointer-events:auto;
   }
   .rc-btn.secondary{ background:#0f2f63; }
   .rc-btn.ghost{
@@ -98,6 +101,7 @@
     /* large touch target */
     min-height:60px;
     touch-action:manipulation;
+    position:relative; z-index:10; pointer-events:auto;
   }
   .rc-choice input{ width:22px; height:22px; flex-shrink:0; pointer-events:none; accent-color:var(--blue); }
   .rc-choice strong{ display:block; font-size:15px; }
@@ -110,6 +114,7 @@
     padding:11px 14px; border-radius:999px; border:1px solid var(--border);
     background:#fff; cursor:pointer; font-weight:800; font-size:14px;
     touch-action:manipulation; min-height:44px; display:flex; align-items:center;
+    position:relative; z-index:10; pointer-events:auto;
   }
   .rc-tag.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
 
@@ -216,7 +221,7 @@
       </div>
     </div>
     <div class="rc-nav-end">
-      <button type="button" class="rc-btn" onclick="rcNext(1)">Next →</button>
+      <button type="button" class="rc-btn" name="nav-next-1" onclick="rcNext(1)">Next →</button>
     </div>
     <div class="rc-note" style="margin-top:12px;">Tip: You will be able to compare multiple different retirement strategies and rates to see which one suits you best.</div>
   </div>
@@ -321,8 +326,8 @@
     </div>
 
     <div class="rc-nav">
-      <button type="button" class="rc-btn ghost" onclick="rcBack(2)">← Back</button>
-      <button type="button" class="rc-btn" onclick="rcNext(2)">Next →</button>
+      <button type="button" class="rc-btn ghost" name="nav-back-2" onclick="rcBack(2)">← Back</button>
+      <button type="button" class="rc-btn" name="nav-next-2" onclick="rcNext(2)">Next →</button>
     </div>
   </div>
 
@@ -374,8 +379,8 @@
       </div>
     </div>
     <div class="rc-nav">
-      <button type="button" class="rc-btn ghost" onclick="rcBack(3)">← Back</button>
-      <button type="button" class="rc-btn" onclick="rcNext(3)">See Results →</button>
+      <button type="button" class="rc-btn ghost" name="nav-back-3" onclick="rcBack(3)">← Back</button>
+      <button type="button" class="rc-btn" name="nav-next-3" onclick="rcNext(3)">See Results →</button>
     </div>
   </div>
 
@@ -423,8 +428,8 @@
     </div>
 
     <div class="rc-nav" style="margin-top:16px;">
-      <button type="button" class="rc-btn ghost" onclick="rcBack(4)">← Back</button>
-      <button type="button" class="rc-btn secondary" onclick="rcRestart()">Start Over</button>
+      <button type="button" class="rc-btn ghost" name="nav-back-4" onclick="rcBack(4)">← Back</button>
+      <button type="button" class="rc-btn secondary" name="nav-restart" onclick="rcRestart()">Start Over</button>
     </div>
   </div>
 </div>
@@ -454,10 +459,12 @@
   function showStep(step){
     rcState.step = step;
     rcSetStepper(step);
-    // Select by CSS class — identical mechanism to the working stepper.
-    // Classes are never stripped by GHL; data-* attributes sometimes are.
-    // setProperty 'important' prevents any host stylesheet from overriding.
-    document.querySelectorAll(".rc-step-pnl").forEach(function(el, i){
+    var panels = document.querySelectorAll(".rc-step-pnl");
+    if(!panels || panels.length===0){
+      alert("showStep: no .rc-step-pnl elements found (count=0). GHL may have stripped classes.");
+      return;
+    }
+    panels.forEach(function(el, i){
       if(i + 1 === step){
         el.classList.remove("rc-hidden");
         el.style.setProperty("display","block","important");
@@ -466,20 +473,23 @@
         el.style.setProperty("display","none","important");
       }
     });
-    try{ document.querySelector("#rc").scrollIntoView({behavior:"smooth",block:"start"}); }catch(e){}
+    try{ document.querySelector("#rc,.rc-wrap").scrollIntoView({behavior:"smooth",block:"start"}); }catch(e){}
   }
 
   function rcNext(from){
-    if(from===1){
-      var initial = Number(rcEl("rcInitialAmount").value||0);
-      var yrs = Number(rcEl("rcYears").value||0);
-      if(initial<=0 || yrs<1){ alert("Please enter a valid amount and at least 1 year."); return; }
-    }
-    if(from===2){
-      if(rcState.picks.size<2){ alert("Pick at least 2 plans to compare."); return; }
-    }
-    showStep(from+1);
-    if(from+1===4) rcRun();
+    try{
+      if(from===1){
+        var el1 = rcEl("rcInitialAmount"), el2 = rcEl("rcYears");
+        var initial = el1 ? Number(el1.value||0) : 0;
+        var yrs     = el2 ? Number(el2.value||0) : 0;
+        if(initial<=0 || yrs<1){ alert("Please enter a valid amount and at least 1 year."); return; }
+      }
+      if(from===2){
+        if(rcState.picks.size<2){ alert("Pick at least 2 plans to compare."); return; }
+      }
+      showStep(from+1);
+      if(from+1===4) rcRun();
+    }catch(e){ alert("rcNext error: "+(e&&e.message?e.message:e)); }
   }
 
   function rcBack(current){ showStep(current-1); }
@@ -750,13 +760,44 @@
     t.innerHTML=html;
   }
 
-  // ========= DEFAULTS =========
-  (function(){
+  // ========= INIT =========
+  // rcInit is called once the DOM is ready.
+  // It (a) sets checkbox defaults and (b) attaches an event-delegation
+  // listener on the whole calculator container so navigation works even
+  // when GHL strips inline onclick attributes.
+  function rcInit(){
+    // Checkbox defaults
     var fia=rcEl("pick_fia"), mf=rcEl("pick_mf");
     if(fia){ fia.checked=true; rcState.picks.add("fia"); }
     if(mf){  mf.checked=true;  rcState.picks.add("mf");  }
     rcUpdateChoiceStyles();
-  })();
+
+    // Event delegation — backup for inline onclick in case GHL strips them.
+    // Buttons are identified by their name attribute.
+    var wrap = document.getElementById("rc") || document.querySelector(".rc-wrap");
+    if(wrap){
+      wrap.addEventListener("click", function(e){
+        var btn = e.target.closest("button[name]");
+        if(!btn) return;
+        var n = btn.getAttribute("name");
+        if(n==="nav-next-1"){ rcNext(1); }
+        else if(n==="nav-back-2"){ rcBack(2); }
+        else if(n==="nav-next-2"){ rcNext(2); }
+        else if(n==="nav-back-3"){ rcBack(3); }
+        else if(n==="nav-next-3"){ rcNext(3); }
+        else if(n==="nav-back-4"){ rcBack(4); }
+        else if(n==="nav-restart"){ rcRestart(); }
+      });
+    }
+  }
+
+  // DOMContentLoaded-safe: if GHL moves the <script> to <head>,
+  // or executes it before our HTML is rendered, wait for ready state.
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", rcInit);
+  } else {
+    rcInit();
+  }
 </script>
 
 </body>

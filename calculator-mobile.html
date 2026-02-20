@@ -189,7 +189,7 @@
 
 <div class="rc-wrap" id="rc">
   <div class="rc-title">Compare Annuities &amp; Retirement Plans</div>
-  <div class="rc-sub">See projected growth and estimated monthly income — then get matched to the right expert.</div>
+  <div class="rc-sub">See projected growth and estimated monthly income to find the best retirement strategy for you.</div>
 
   <!-- Stepper -->
   <div class="rc-stepper" id="rcStepper">
@@ -198,6 +198,9 @@
     <div class="rc-pill" data-step="3">3) Priorities</div>
     <div class="rc-pill" data-step="4">4) Results</div>
   </div>
+  <!-- Debug status: shows which step fired and how many panels were found.
+       Helps diagnose GHL embed issues without needing browser dev tools. -->
+  <div id="rcStatus" style="text-align:center;font-size:11px;color:#999;min-height:14px;margin-bottom:4px;"></div>
 
   <!-- ===== STEP 1 ===== -->
   <div class="rc-step-pnl" id="rcStep1">
@@ -221,7 +224,7 @@
       </div>
     </div>
     <div class="rc-nav-end">
-      <button type="button" class="rc-btn" name="nav-next-1" onclick="rcNext(1)">Next →</button>
+      <button type="button" class="rc-btn" id="rcBN1" name="nav-next-1" ontouchend="event.preventDefault();rcNext(1);" onclick="rcNext(1)">Next →</button>
     </div>
     <div class="rc-note" style="margin-top:12px;">Tip: You will be able to compare multiple different retirement strategies and rates to see which one suits you best.</div>
   </div>
@@ -326,8 +329,8 @@
     </div>
 
     <div class="rc-nav">
-      <button type="button" class="rc-btn ghost" name="nav-back-2" onclick="rcBack(2)">← Back</button>
-      <button type="button" class="rc-btn" name="nav-next-2" onclick="rcNext(2)">Next →</button>
+      <button type="button" class="rc-btn ghost" id="rcBB2" name="nav-back-2" ontouchend="event.preventDefault();rcBack(2);" onclick="rcBack(2)">← Back</button>
+      <button type="button" class="rc-btn" id="rcBN2" name="nav-next-2" ontouchend="event.preventDefault();rcNext(2);" onclick="rcNext(2)">Next →</button>
     </div>
   </div>
 
@@ -379,8 +382,8 @@
       </div>
     </div>
     <div class="rc-nav">
-      <button type="button" class="rc-btn ghost" name="nav-back-3" onclick="rcBack(3)">← Back</button>
-      <button type="button" class="rc-btn" name="nav-next-3" onclick="rcNext(3)">See Results →</button>
+      <button type="button" class="rc-btn ghost" id="rcBB3" name="nav-back-3" ontouchend="event.preventDefault();rcBack(3);" onclick="rcBack(3)">← Back</button>
+      <button type="button" class="rc-btn" id="rcBN3" name="nav-next-3" ontouchend="event.preventDefault();rcNext(3);" onclick="rcNext(3)">See Results →</button>
     </div>
   </div>
 
@@ -428,8 +431,8 @@
     </div>
 
     <div class="rc-nav" style="margin-top:16px;">
-      <button type="button" class="rc-btn ghost" name="nav-back-4" onclick="rcBack(4)">← Back</button>
-      <button type="button" class="rc-btn secondary" name="nav-restart" onclick="rcRestart()">Start Over</button>
+      <button type="button" class="rc-btn ghost" id="rcBB4" name="nav-back-4" ontouchend="event.preventDefault();rcBack(4);" onclick="rcBack(4)">← Back</button>
+      <button type="button" class="rc-btn secondary" id="rcBRS" name="nav-restart" ontouchend="event.preventDefault();rcRestart();" onclick="rcRestart()">Start Over</button>
     </div>
   </div>
 </div>
@@ -456,14 +459,31 @@
     });
   }
 
+  // rcWrap: reference to the outermost container, resolved once.
+  // Scoping all queries to this element prevents accidentally
+  // toggling GHL-duplicated copies of the HTML.
+  var rcWrap = null;
+  function rcGetWrap(){
+    if(rcWrap) return rcWrap;
+    rcWrap = document.getElementById("rc") || document.querySelector(".rc-wrap");
+    return rcWrap;
+  }
+
+  function rcDbg(msg){
+    var el = document.getElementById("rcStatus");
+    if(el) el.textContent = msg;
+  }
+
   function showStep(step){
     rcState.step = step;
     rcSetStepper(step);
-    var panels = document.querySelectorAll(".rc-step-pnl");
-    if(!panels || panels.length===0){
-      alert("showStep: no .rc-step-pnl elements found (count=0). GHL may have stripped classes.");
-      return;
-    }
+    var wrap = rcGetWrap();
+    // Scope to our container so we only affect the visible copy
+    // if GHL has duplicated the embed.
+    var scope = wrap || document;
+    var panels = scope.querySelectorAll(".rc-step-pnl");
+    rcDbg("showStep("+step+") panels:"+panels.length+" wrap:"+(wrap?"found":"null"));
+    if(!panels || panels.length===0){ return; }
     panels.forEach(function(el, i){
       if(i + 1 === step){
         el.classList.remove("rc-hidden");
@@ -473,10 +493,11 @@
         el.style.setProperty("display","none","important");
       }
     });
-    try{ document.querySelector("#rc,.rc-wrap").scrollIntoView({behavior:"smooth",block:"start"}); }catch(e){}
+    try{ (wrap||document.body).scrollIntoView({behavior:"smooth",block:"start"}); }catch(e){}
   }
 
   function rcNext(from){
+    rcDbg("rcNext("+from+") fired");
     try{
       if(from===1){
         var el1 = rcEl("rcInitialAmount"), el2 = rcEl("rcYears");
@@ -772,9 +793,20 @@
     if(mf){  mf.checked=true;  rcState.picks.add("mf");  }
     rcUpdateChoiceStyles();
 
-    // Event delegation — backup for inline onclick in case GHL strips them.
-    // Buttons are identified by their name attribute.
-    var wrap = document.getElementById("rc") || document.querySelector(".rc-wrap");
+    // Layer 1: direct addEventListener by ID (works even if onclick/ontouchend stripped)
+    var btnMap = {
+      rcBN1:function(){ rcNext(1); },
+      rcBB2:function(){ rcBack(2); }, rcBN2:function(){ rcNext(2); },
+      rcBB3:function(){ rcBack(3); }, rcBN3:function(){ rcNext(3); },
+      rcBB4:function(){ rcBack(4); }, rcBRS:function(){ rcRestart(); }
+    };
+    Object.keys(btnMap).forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.addEventListener("click", btnMap[id]);
+    });
+
+    // Layer 2: event delegation on container by name attr (deepest fallback)
+    var wrap = rcGetWrap();
     if(wrap){
       wrap.addEventListener("click", function(e){
         var btn = e.target.closest("button[name]");
@@ -789,6 +821,7 @@
         else if(n==="nav-restart"){ rcRestart(); }
       });
     }
+    rcDbg("init ok — wrap:"+(wrap?"found":"null"));
   }
 
   // DOMContentLoaded-safe: if GHL moves the <script> to <head>,

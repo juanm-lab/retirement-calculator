@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>Compare Annuities & Retirement Plans</title>
+</head>
+<body>
+
+<style>
+  :root{
+    --bg:#ffffff;
+    --ink:#0b2a57;
+    --muted:#4b5563;
+    --card:#ffffff;
+    --soft:#f3f5f8;
+    --blue:#1e64e2;
+    --green:#2ecc71;
+    --red:#e74c3c;
+    --border:#d6dde6;
+    --shadow: 0 4px 16px rgba(0,0,0,0.10);
+    --radius: 14px;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{ margin:0; padding:0; background:var(--soft); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+
+  .rc-wrap{
+    width:100%; max-width:520px; margin:0 auto;
+    background:var(--bg); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:18px 16px 28px;
+  }
+
+  /* ---- Title ---- */
+  .rc-title{ font-size:22px; text-align:center; margin:0 0 6px; color:var(--ink); font-weight:900; line-height:1.2; }
+  .rc-sub{ margin:0 0 16px; text-align:center; color:var(--muted); font-size:14px; line-height:1.5; }
+
+  /* ---- Stepper ---- */
+  .rc-stepper{
+    display:flex; gap:0; margin:0 0 16px;
+    border-radius:999px; overflow:hidden; border:1px solid var(--border); background:var(--soft);
+  }
+  .rc-pill{
+    flex:1; padding:10px 4px; text-align:center; font-weight:700; font-size:11px;
+    color:var(--muted); background:var(--soft); white-space:nowrap; line-height:1.2;
+  }
+  .rc-pill.active{ background:var(--blue); color:#fff; }
+
+  /* ---- Cards ---- */
+  .rc-card{
+    background:var(--card); border:1px solid var(--border);
+    border-radius:12px; padding:14px; margin-top:12px;
+  }
+
+  /* ---- All grids are single-column on mobile ---- */
+  .rc-grid, .rc-grid-3{ display:flex; flex-direction:column; gap:12px; }
+
+  /* ---- Labels & inputs ---- */
+  .rc-label{ font-weight:800; color:#111; font-size:14px; display:block; margin-bottom:4px; }
+  .rc-input, .rc-select{
+    width:100%; padding:12px 14px; border:1px solid #cfd6df; border-radius:10px;
+    /* 16px minimum prevents iOS from zooming on focus */
+    font-size:16px; outline:none; background:#fff; -webkit-appearance:none; appearance:none;
+  }
+  .rc-input:focus, .rc-select:focus{ border-color:var(--blue); box-shadow:0 0 0 3px rgba(30,100,226,.15); }
+  .rc-note{ font-size:12px; color:var(--muted); line-height:1.4; margin-top:6px; }
+
+  /* ---- Buttons ---- */
+  .rc-btn{
+    display:block; width:100%; padding:15px 14px;
+    border-radius:12px; border:none; background:var(--blue); color:#fff;
+    font-weight:900; cursor:pointer; font-size:17px; text-align:center;
+    min-height:52px; line-height:1;
+    /* prevent double-tap zoom */
+    touch-action:manipulation;
+  }
+  .rc-btn.secondary{ background:#0f2f63; }
+  .rc-btn.ghost{
+    background:transparent; color:var(--ink);
+    border:1px solid var(--border);
+  }
+  .rc-btn:disabled{ opacity:.5; cursor:not-allowed; }
+
+  /* Paired nav rows: back (ghost, narrower) + next (fill, wider) */
+  .rc-nav{ display:flex; gap:10px; margin-top:16px; }
+  .rc-nav .rc-btn.ghost{ flex:0 0 80px; width:80px; font-size:15px; }
+  .rc-nav .rc-btn:not(.ghost){ flex:1; }
+
+  /* Single-button row */
+  .rc-nav-end{ margin-top:16px; }
+
+  /* ---- Plan choice cards ---- */
+  .rc-choice{
+    display:flex; align-items:center; gap:12px;
+    border:1px solid var(--border); border-radius:12px; padding:14px;
+    cursor:pointer; user-select:none; background:#fff;
+    /* large touch target */
+    min-height:60px;
+    touch-action:manipulation;
+  }
+  .rc-choice input{ width:22px; height:22px; flex-shrink:0; pointer-events:none; accent-color:var(--blue); }
+  .rc-choice strong{ display:block; font-size:15px; }
+  .rc-choice small{ display:block; color:var(--muted); margin-top:2px; font-size:13px; }
+  .rc-choice.selected{ border-color:var(--blue); box-shadow:0 0 0 3px rgba(30,100,226,.12); background:#f4f8ff; }
+
+  /* ---- Stress tags ---- */
+  .rc-stress{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .rc-tag{
+    padding:11px 14px; border-radius:999px; border:1px solid var(--border);
+    background:#fff; cursor:pointer; font-weight:800; font-size:14px;
+    touch-action:manipulation; min-height:44px; display:flex; align-items:center;
+  }
+  .rc-tag.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+
+  /* ---- Result boxes ---- */
+  .rc-resultBoxes{ display:flex; flex-direction:column; gap:10px; }
+  .rc-box{ width:100%; border-radius:14px; padding:14px 16px; text-align:center; border:3px solid #ccc; }
+  .rc-box h4{ margin:0; font-size:16px; font-weight:900; }
+  .rc-val{ font-size:28px; font-weight:900; margin-top:6px; }
+  .rc-box.green{ background:#f4fff4; border-color:var(--green); }
+  .rc-box.green .rc-val{ color:#1e8b3f; }
+  .rc-box.red{ background:#fff3f3; border-color:var(--red); }
+  .rc-box.red .rc-val{ color:#c0392b; }
+  .rc-box.blue{ background:#eef5ff; border-color:var(--blue); }
+  .rc-box.blue .rc-val{ color:var(--blue); }
+
+  /* ---- Misc ---- */
+  .rc-hr{ border:0; border-top:1px solid var(--border); margin:16px 0; }
+  .rc-h3{ margin:0 0 10px; text-align:center; font-size:19px; font-weight:900; color:#111; }
+  .rc-center{ text-align:center; }
+
+  /* ---- Final-value bars ---- */
+  .rc-barWrap{ background:var(--soft); border-radius:12px; padding:12px; }
+  .rc-barRow{ display:flex; align-items:center; gap:8px; margin:8px 0; }
+  .rc-barLbl{ width:80px; font-weight:900; font-size:12px; flex-shrink:0; }
+  .rc-barBg{ flex:1; height:16px; background:#e6ebf2; border-radius:999px; overflow:hidden; }
+  .rc-barFill{ height:16px; width:0%; background:#999; }
+  .rc-barVal{ width:85px; text-align:right; font-weight:900; font-size:12px; flex-shrink:0; }
+
+  /* ---- Growth line chart ---- */
+  .rc-chartWrap{
+    overflow-x:auto; border:1px solid var(--border);
+    border-radius:12px; background:#fff; padding:4px;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  /* ---- Comparison table — scrollable horizontally ---- */
+  .rc-tableWrap{ overflow-x:auto; border-radius:12px; border:1px solid var(--border); -webkit-overflow-scrolling:touch; }
+  .rc-table{ width:100%; border-collapse:collapse; min-width:340px; }
+  .rc-table th, .rc-table td{ padding:11px 10px; border-bottom:1px solid var(--border); font-size:13px; white-space:nowrap; }
+  .rc-table th{ background:#f7fafc; text-align:left; font-weight:900; }
+  .rc-table tr:last-child td{ border-bottom:none; }
+  .rc-badge{ display:inline-block; padding:4px 9px; border-radius:999px; font-size:12px; font-weight:900; }
+  .rc-badge.good{ background:#eafff1; color:#0f7a39; }
+  .rc-badge.bad{ background:#fff1f1; color:#a61b1b; }
+  .rc-badge.mid{ background:#fff7e6; color:#8b5a00; }
+
+  /* ---- Monthly income display ---- */
+  .rc-incomeVal{ font-size:34px; font-weight:900; color:var(--ink); margin-top:4px; }
+
+  /* ---- CTA block ---- */
+  .rc-cta{
+    margin-top:16px; padding:16px; border-radius:14px;
+    background:#eef5ff; border:2px solid #a9c6ff;
+  }
+  .rc-ctaTitle{ font-size:17px; font-weight:900; margin-bottom:6px; color:var(--ink); }
+  .rc-ctaBody{ color:#1f2937; line-height:1.55; font-size:14px; }
+  .rc-ctaBtn{
+    display:block; width:100%; margin-top:14px; padding:15px 14px;
+    border-radius:12px; background:var(--blue); color:#fff;
+    font-weight:900; font-size:17px; text-align:center;
+    text-decoration:none; min-height:52px; line-height:1;
+    touch-action:manipulation;
+  }
+</style>
+
+<div class="rc-wrap" id="rc">
+  <div class="rc-title">Compare Annuities &amp; Retirement Plans</div>
+  <div class="rc-sub">See projected growth and estimated monthly income — then get matched to the right expert.</div>
+
+  <!-- Stepper -->
+  <div class="rc-stepper" id="rcStepper">
+    <div class="rc-pill active" data-step="1">1) Basics</div>
+    <div class="rc-pill" data-step="2">2) Compare</div>
+    <div class="rc-pill" data-step="3">3) Priorities</div>
+    <div class="rc-pill" data-step="4">4) Results</div>
+  </div>
+
+  <!-- ===== STEP 1 ===== -->
+  <div id="step1">
+    <div class="rc-h3">Step 1 — Your Basics</div>
+    <div class="rc-grid">
+      <div>
+        <label class="rc-label" for="rcInitialAmount">Initial Investment Amount ($)</label>
+        <input class="rc-input" id="rcInitialAmount" type="number" value="100000" min="0" step="1000" inputmode="numeric">
+      </div>
+      <div>
+        <label class="rc-label" for="rcYears">Years to Retirement</label>
+        <input class="rc-input" id="rcYears" type="number" value="10" min="1" max="50" inputmode="numeric">
+      </div>
+      <div>
+        <label class="rc-label" for="rcAge">Current Age</label>
+        <input class="rc-input" id="rcAge" type="number" value="55" min="18" max="85" inputmode="numeric">
+      </div>
+      <div>
+        <label class="rc-label" for="rcState">State (helps match the right expert)</label>
+        <input class="rc-input" id="rcState" type="text" value="" placeholder="e.g., FL" autocomplete="address-level1">
+      </div>
+    </div>
+    <div class="rc-nav-end">
+      <button class="rc-btn" onclick="rcNext(1)">Next →</button>
+    </div>
+    <div class="rc-note" style="margin-top:12px;">Tip: People searching "best annuity rates" usually want side-by-side comparisons. You'll get those in Step 2.</div>
+  </div>
+
+  <!-- ===== STEP 2 ===== -->
+  <div id="step2" style="display:none;">
+    <div class="rc-h3">Step 2 — Choose What To Compare</div>
+    <div class="rc-note" style="text-align:center; margin-bottom:10px;">Pick 2 or 3 plans to compare</div>
+
+    <div class="rc-grid">
+      <div class="rc-choice" onclick="rcTogglePlan('fia')">
+        <input type="checkbox" id="pick_fia">
+        <div>
+          <strong>Indexed Annuity (FIA)</strong>
+          <small>Cap + principal protection (no losses in this model)</small>
+        </div>
+      </div>
+
+      <div class="rc-choice" onclick="rcTogglePlan('fixed')">
+        <input type="checkbox" id="pick_fixed">
+        <div>
+          <strong>Fixed Annuity</strong>
+          <small>Stable credited rate — lower upside, high certainty</small>
+        </div>
+      </div>
+
+      <div class="rc-choice" onclick="rcTogglePlan('variable')">
+        <input type="checkbox" id="pick_variable">
+        <div>
+          <strong>Variable Annuity</strong>
+          <small>Market-like returns, product costs (simplified)</small>
+        </div>
+      </div>
+
+      <div class="rc-choice" onclick="rcTogglePlan('mf')">
+        <input type="checkbox" id="pick_mf">
+        <div>
+          <strong>Mutual Fund</strong>
+          <small>Market return minus management fees</small>
+        </div>
+      </div>
+
+      <div class="rc-choice" onclick="rcTogglePlan('bonds')">
+        <input type="checkbox" id="pick_bonds">
+        <div>
+          <strong>Bond Portfolio</strong>
+          <small>Lower return, smoother path (simplified)</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="rc-card" style="margin-top:14px;">
+      <div class="rc-label" style="margin-bottom:10px;">Assumptions</div>
+      <div>
+        <label class="rc-label" for="rcMarketReturn">Market Avg Return (%)</label>
+        <input class="rc-input" id="rcMarketReturn" type="number" value="7" step="0.25" inputmode="decimal">
+      </div>
+      <div style="margin-top:12px;">
+        <label class="rc-label" for="rcInflation">Inflation Rate (%)</label>
+        <input class="rc-input" id="rcInflation" type="number" value="3" step="0.25" inputmode="decimal">
+      </div>
+    </div>
+
+    <div class="rc-card" style="margin-top:10px;">
+      <div class="rc-label" style="margin-bottom:10px;">Plan-Specific Rates</div>
+      <div class="rc-grid">
+        <div>
+          <label class="rc-label" for="rcCapRate">FIA Cap Rate (%)</label>
+          <input class="rc-input" id="rcCapRate" type="number" value="10" step="0.25" inputmode="decimal">
+          <div class="rc-note">Higher cap = higher upside. FIA modeled with no downside.</div>
+        </div>
+        <div>
+          <label class="rc-label" for="rcFixedRate">Fixed Annuity Credited Rate (%)</label>
+          <input class="rc-input" id="rcFixedRate" type="number" value="4.5" step="0.1" inputmode="decimal">
+        </div>
+        <div>
+          <label class="rc-label" for="rcMgmtFee">Mutual Fund Annual Fee (%)</label>
+          <input class="rc-input" id="rcMgmtFee" type="number" value="1.5" step="0.1" inputmode="decimal">
+          <div class="rc-note">Fees compound over time.</div>
+        </div>
+        <div>
+          <label class="rc-label" for="rcVaFee">Variable Annuity Fee (%)</label>
+          <input class="rc-input" id="rcVaFee" type="number" value="2.5" step="0.1" inputmode="decimal">
+          <div class="rc-note">VA ≈ market return − VA costs.</div>
+        </div>
+        <div>
+          <label class="rc-label" for="rcBondReturn">Bond Portfolio Return (%)</label>
+          <input class="rc-input" id="rcBondReturn" type="number" value="4.0" step="0.1" inputmode="decimal">
+        </div>
+      </div>
+    </div>
+
+    <div class="rc-card" style="margin-top:10px;">
+      <div class="rc-label">Stress Test Scenario</div>
+      <div class="rc-stress">
+        <div class="rc-tag active" onclick="rcSetStress('normal')" id="stress_normal">Normal</div>
+        <div class="rc-tag" onclick="rcSetStress('2008')" id="stress_2008">2008 Crash</div>
+        <div class="rc-tag" onclick="rcSetStress('2022')" id="stress_2022">2022 Down</div>
+        <div class="rc-tag" onclick="rcSetStress('flat')" id="stress_flat">Flat Decade</div>
+      </div>
+      <div class="rc-note">Stress tests show downside impact across plan types.</div>
+    </div>
+
+    <div class="rc-nav">
+      <button class="rc-btn ghost" onclick="rcBack(2)">← Back</button>
+      <button class="rc-btn" onclick="rcNext(2)">Next →</button>
+    </div>
+  </div>
+
+  <!-- ===== STEP 3 ===== -->
+  <div id="step3" style="display:none;">
+    <div class="rc-h3">Step 3 — What Matters Most?</div>
+    <div class="rc-grid">
+      <div>
+        <label class="rc-label" for="rcPriority">Primary Priority</label>
+        <select class="rc-select" id="rcPriority">
+          <option value="protection">Principal protection</option>
+          <option value="growth">Growth potential</option>
+          <option value="income">Guaranteed income</option>
+          <option value="tax">Tax efficiency</option>
+          <option value="legacy">Legacy planning</option>
+        </select>
+        <div class="rc-note">This personalizes your recommendation and expert match.</div>
+      </div>
+      <div>
+        <label class="rc-label" for="rcGoal">Goal (optional)</label>
+        <select class="rc-select" id="rcGoal">
+          <option value="compare">Compare best options</option>
+          <option value="rates">Find best annuity rates</option>
+          <option value="income">Estimate retirement income</option>
+          <option value="safety">Reduce risk / volatility</option>
+        </select>
+      </div>
+      <div>
+        <label class="rc-label" for="rcRetireAge">Target Retirement Age</label>
+        <input class="rc-input" id="rcRetireAge" type="number" value="65" min="40" max="85" inputmode="numeric">
+      </div>
+      <div>
+        <label class="rc-label" for="rcIncomeMode">Income Estimate Method</label>
+        <select class="rc-select" id="rcIncomeMode">
+          <option value="rule4">4% rule (portfolio-style)</option>
+          <option value="annuityPayout">Annuity payout rate</option>
+        </select>
+        <div class="rc-note">We'll compute a monthly income estimate from projected values.</div>
+      </div>
+      <div>
+        <label class="rc-label" for="rcPayoutRate">Annuity Payout Rate (% / year)</label>
+        <input class="rc-input" id="rcPayoutRate" type="number" value="5.0" step="0.1" inputmode="decimal">
+        <div class="rc-note">Typical payout assumptions vary by age &amp; product.</div>
+      </div>
+      <div>
+        <label class="rc-label" for="rcIncomeYears">How long should income last? (years)</label>
+        <input class="rc-input" id="rcIncomeYears" type="number" value="25" min="5" max="40" inputmode="numeric">
+        <div class="rc-note">Used for context only — your expert can refine this.</div>
+      </div>
+    </div>
+    <div class="rc-nav">
+      <button class="rc-btn ghost" onclick="rcBack(3)">← Back</button>
+      <button class="rc-btn" onclick="rcNext(3)">See Results →</button>
+    </div>
+  </div>
+
+  <!-- ===== STEP 4 ===== -->
+  <div id="step4" style="display:none;">
+    <div class="rc-h3">Step 4 — Results</div>
+
+    <div class="rc-resultBoxes" id="rcTopResults"></div>
+
+    <div class="rc-hr"></div>
+
+    <div class="rc-center">
+      <div style="font-weight:900; font-size:15px; color:#111;">Estimated Monthly Income</div>
+      <div id="rcMonthlyIncome" class="rc-incomeVal">—</div>
+    </div>
+
+    <!-- CTA -->
+    <div class="rc-cta">
+      <div class="rc-ctaTitle">We found the right expert type for your needs</div>
+      <div id="ctaBody" class="rc-ctaBody"></div>
+      <a id="ctaLink" class="rc-ctaBtn" href="#">Find My Expert Match →</a>
+    </div>
+
+    <div class="rc-hr"></div>
+
+    <div class="rc-h3" style="margin-bottom:10px;">Visual Breakdown</div>
+
+    <div class="rc-barWrap">
+      <div style="font-weight:900; font-size:13px; margin-bottom:6px;">Final Values (Selected Plans)</div>
+      <div id="barArea"></div>
+      <div class="rc-note">Bars normalized to top plan value.</div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <div style="font-weight:900; font-size:14px; margin-bottom:8px;">Growth Over Time (Year-by-Year)</div>
+      <div id="growthChart" class="rc-chartWrap"></div>
+      <div class="rc-note">Scroll sideways to see all years. Top 2 plans shown.</div>
+    </div>
+
+    <div class="rc-hr"></div>
+
+    <div class="rc-h3">Comparison Summary</div>
+    <div class="rc-tableWrap">
+      <table class="rc-table" id="summaryTable"></table>
+    </div>
+
+    <div class="rc-nav" style="margin-top:16px;">
+      <button class="rc-btn ghost" onclick="rcBack(4)">← Back</button>
+      <button class="rc-btn secondary" onclick="rcRestart()">Start Over</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ========= CONFIG =========
+  const EXPERT_MATCH_URL = "https://primeretirementhub.com/find-an-expert";
+
+  // ========= STATE =========
+  var rcState = {
+    step: 1,
+    stress: "normal",
+    picks: new Set(["fia","mf"])
+  };
+
+  // ========= HELPERS =========
+  function rcEl(id){ return document.getElementById(id); }
+  function rcMoney(n){ return "$"+Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function rcClamp(n,lo,hi){ return Math.max(lo,Math.min(hi,n)); }
+
+  function rcSetStepper(step){
+    document.querySelectorAll("#rcStepper .rc-pill").forEach(function(p){
+      p.classList.toggle("active", Number(p.dataset.step)===step);
+    });
+  }
+
+  function showStep(step){
+    rcState.step = step;
+    rcSetStepper(step);
+    ["step1","step2","step3","step4"].forEach(function(s,i){
+      rcEl(s).style.display = (i+1===step) ? "block" : "none";
+    });
+    rcEl("rc").scrollIntoView({behavior:"smooth", block:"start"});
+  }
+
+  function rcNext(from){
+    if(from===1){
+      var initial = Number(rcEl("rcInitialAmount").value||0);
+      var yrs = Number(rcEl("rcYears").value||0);
+      if(initial<=0 || yrs<1){ alert("Please enter a valid amount and at least 1 year."); return; }
+    }
+    if(from===2){
+      if(rcState.picks.size<2){ alert("Pick at least 2 plans to compare."); return; }
+    }
+    showStep(from+1);
+    if(from+1===4) rcRun();
+  }
+
+  function rcBack(current){ showStep(current-1); }
+
+  function rcRestart(){
+    rcState = {step:1, stress:"normal", picks:new Set(["fia","mf"])};
+    rcEl("pick_fia").checked = true;
+    rcEl("pick_mf").checked = true;
+    ["fixed","variable","bonds"].forEach(function(k){ rcEl("pick_"+k).checked = false; });
+    rcSetStress("normal");
+    rcUpdateChoiceStyles();
+    showStep(1);
+  }
+
+  // ========= PLAN SELECTION =========
+  function rcTogglePlan(key){
+    var cb = rcEl("pick_"+key);
+    var nowChecked = !cb.checked;
+    if(nowChecked && rcState.picks.size>=3){
+      alert("You can compare up to 3 plans at a time.");
+      return;
+    }
+    if(!nowChecked && rcState.picks.size<=2){
+      alert("Please keep at least 2 selected for a comparison.");
+      return;
+    }
+    cb.checked = nowChecked;
+    if(nowChecked){ rcState.picks.add(key); } else { rcState.picks.delete(key); }
+    rcUpdateChoiceStyles();
+  }
+
+  function rcUpdateChoiceStyles(){
+    ["fia","fixed","variable","mf","bonds"].forEach(function(k){
+      var cb = rcEl("pick_"+k);
+      if(!cb) return;
+      var card = cb.closest(".rc-choice");
+      if(card) card.classList.toggle("selected", cb.checked);
+    });
+  }
+
+  // ========= STRESS SCENARIOS =========
+  function rcSetStress(mode){
+    rcState.stress = mode;
+    ["normal","2008","2022","flat"].forEach(function(m){
+      rcEl("stress_"+m).classList.toggle("active", m===mode);
+    });
+  }
+
+  // ========= SIMULATION =========
+  function rcBuildMarketSeries(years, avgReturn, stress){
+    var wiggles = [0.02,-0.01,0.015,-0.005,0.01,-0.015,0.005,0.0,0.012,-0.008];
+    var base = [];
+    for(var i=0;i<years;i++) base.push(avgReturn + wiggles[i % wiggles.length]);
+
+    if(stress==="flat") return base.map(function(){ return 0; });
+    if(stress==="2022"){
+      var s = base.slice();
+      if(years>=1) s[0]=-0.18;
+      for(var j=1;j<years;j++) s[j]=Math.min(s[j], avgReturn+0.02);
+      return s;
+    }
+    if(stress==="2008"){
+      var s2 = base.slice();
+      if(years>=1) s2[0]=-0.38;
+      if(years>=2) s2[1]=0.18;
+      if(years>=3) s2[2]=0.12;
+      return s2;
+    }
+    return base;
+  }
+
+  function rcSimulatePlan(planKey, initial, years, params){
+    var cap=params.cap, ms=params.ms, mf=params.mf, fr=params.fr, vf=params.vf, br=params.br;
+    var v=initial, series=[v];
+    for(var i=0;i<years;i++){
+      var r=ms[i];
+      if(planKey==="fia")           v*=(1+Math.max(Math.min(r,cap),0));
+      else if(planKey==="mf")       v*=(1+r-mf);
+      else if(planKey==="fixed")    v*=(1+fr);
+      else if(planKey==="variable") v*=(1+r-vf);
+      else if(planKey==="bonds")    v*=(1+br);
+      series.push(v);
+    }
+    return {final:v, series:series};
+  }
+
+  function rcPlanName(key){
+    return ({fia:"Indexed Annuity (FIA)",mf:"Mutual Fund (MF)",fixed:"Fixed Annuity",variable:"Variable Annuity",bonds:"Bond Portfolio"})[key]||key;
+  }
+  function rcPlanColor(key){ return (key==="fia"||key==="fixed")?"green":(key==="mf"||key==="variable")?"red":"blue"; }
+
+  // ========= RUN & RENDER =========
+  function rcRun(){
+    var initial   = Number(rcEl("rcInitialAmount").value||0);
+    var years     = Number(rcEl("rcYears").value||10);
+    var age       = Number(rcEl("rcAge").value||55);
+    var state     = (rcEl("rcState").value||"").trim();
+    var cap       = Number(rcEl("rcCapRate").value||0)/100;
+    var avgMkt    = Number(rcEl("rcMarketReturn").value||0)/100;
+    var infl      = Number(rcEl("rcInflation").value||0)/100;
+    var mf        = Number(rcEl("rcMgmtFee").value||0)/100;
+    var fr        = Number(rcEl("rcFixedRate").value||0)/100;
+    var vf        = Number(rcEl("rcVaFee").value||0)/100;
+    var br        = Number(rcEl("rcBondReturn").value||0)/100;
+    var priority  = rcEl("rcPriority").value;
+    var goal      = rcEl("rcGoal").value;
+    var retireAge   = Number(rcEl("rcRetireAge").value||65);
+    var incomeMode  = rcEl("rcIncomeMode").value;
+    var payoutRate  = Number(rcEl("rcPayoutRate").value||5)/100;
+    var incomeYears = Number(rcEl("rcIncomeYears").value||25);
+
+    var ms = rcBuildMarketSeries(years, avgMkt, rcState.stress);
+    var params = {cap:cap, ms:ms, mf:mf, fr:fr, vf:vf, br:br};
+    var selected = Array.from(rcState.picks);
+
+    var sims = selected.map(function(k){ return Object.assign({key:k}, rcSimulatePlan(k,initial,years,params)); });
+    sims.sort(function(a,b){ return b.final-a.final; });
+
+    // Result boxes
+    var topEl = rcEl("rcTopResults"); topEl.innerHTML="";
+    sims.forEach(function(s){
+      var box=document.createElement("div");
+      box.className="rc-box "+rcPlanColor(s.key);
+      box.innerHTML="<h4>"+rcPlanName(s.key)+"</h4><div class='rc-val'>"+rcMoney(s.final)+"</div>";
+      topEl.appendChild(box);
+    });
+
+    // Monthly income
+    var best = sims[0];
+    var annual = incomeMode==="rule4" ? best.final*0.04 : best.final*payoutRate;
+    var monthly = annual/12;
+    rcEl("rcMonthlyIncome").textContent = rcMoney(monthly);
+
+    // CTA
+    var expertType = (function(){
+      if(priority==="income")     return "Guaranteed Income Specialist";
+      if(priority==="protection") return "Principal Protection (FIA/Fixed) Specialist";
+      if(priority==="growth")     return "Growth & Allocation Retirement Strategist";
+      if(priority==="tax")        return "Tax-Aware Retirement Planner";
+      if(priority==="legacy")     return "Legacy & Beneficiary Planning Specialist";
+      return "Retirement Planning Specialist";
+    })();
+    var lines=[];
+    lines.push("Based on your inputs, <strong>"+rcPlanName(best.key)+"</strong> projected highest under the selected scenario ("+rcState.stress+").");
+    if(priority==="protection") lines.push("You prioritized <strong>principal protection</strong>, which often aligns with fixed or indexed annuity strategies.");
+    if(priority==="income")     lines.push("You prioritized <strong>guaranteed income</strong>, so we'll match you with an income-focused annuity expert.");
+    if(priority==="growth")     lines.push("You prioritized <strong>growth</strong>, so we'll match you with someone who can compare capped protection vs. market allocation.");
+    if(goal==="rates")          lines.push("You selected <strong>finding the best annuity rates</strong>, so we'll match you with an expert who tracks competitive rate environments.");
+    lines.push("We'll match you with a <strong>"+expertType+"</strong> licensed in your area"+(state?" ("+state.toUpperCase()+")":"")+". ");
+    rcEl("ctaBody").innerHTML = lines.join(" ");
+
+    var qp = new URLSearchParams({
+      amount:initial, years:years, age:age, state:state, stress:rcState.stress,
+      picks:selected.join(","), best:best.key,
+      capRate:(cap*100).toFixed(2), marketReturn:(avgMkt*100).toFixed(2),
+      mgmtFee:(mf*100).toFixed(2), fixedRate:(fr*100).toFixed(2),
+      vaFee:(vf*100).toFixed(2), bondReturn:(br*100).toFixed(2),
+      inflation:(infl*100).toFixed(2), priority:priority, goal:goal,
+      retireAge:retireAge, incomeMode:incomeMode,
+      payoutRate:(payoutRate*100).toFixed(2), incomeYears:incomeYears,
+      estMonthly:monthly.toFixed(2)
+    });
+    rcEl("ctaLink").href = EXPERT_MATCH_URL+"?"+qp.toString();
+
+    rcRenderBars(sims);
+    rcRenderGrowth(sims.slice(0,2), years);
+    rcRenderTable(selected, priority);
+    showStep(4);
+  }
+
+  function rcRenderBars(sims){
+    var area=rcEl("barArea"); area.innerHTML="";
+    var maxV=Math.max.apply(null, sims.map(function(s){return s.final;}));
+    sims.forEach(function(s){
+      var pct=maxV?(s.final/maxV)*100:0;
+      var row=document.createElement("div"); row.className="rc-barRow";
+      var lbl=document.createElement("div"); lbl.className="rc-barLbl";
+      lbl.textContent=rcPlanName(s.key).replace(" (FIA)","").replace(" (MF)","");
+      var bg=document.createElement("div"); bg.className="rc-barBg";
+      var fill=document.createElement("div"); fill.className="rc-barFill";
+      fill.style.width=rcClamp(pct,0,100)+"%";
+      fill.style.background=rcPlanColor(s.key)==="green"?"var(--green)":rcPlanColor(s.key)==="red"?"var(--red)":"var(--blue)";
+      bg.appendChild(fill);
+      var val=document.createElement("div"); val.className="rc-barVal"; val.textContent=rcMoney(s.final);
+      row.appendChild(lbl); row.appendChild(bg); row.appendChild(val);
+      area.appendChild(row);
+    });
+  }
+
+  function rcRenderGrowth(topTwo, years){
+    var container=rcEl("growthChart"); container.innerHTML="";
+    if(topTwo.length<2) return;
+    var s1=topTwo[0], s2=topTwo[1];
+    var allVals=s1.series.concat(s2.series);
+    var maxV=Math.max.apply(null,allVals);
+    var minV=Math.min.apply(null,allVals);
+    var range=maxV-minV||1;
+
+    var padL=10, padR=16, padT=22, padB=28;
+    // On mobile use 26px per year so chart isn't too wide, but still scrollable
+    var perYear=26;
+    var W=Math.max(padL+padR+years*perYear, container.offsetWidth||320);
+    var H=180;
+    var chartH=H-padT-padB;
+    var chartW=W-padL-padR;
+
+    function xp(i){ return (padL+(i/years)*chartW).toFixed(1); }
+    function yp(v){ return (padT+chartH*(1-(v-minV)/range)).toFixed(1); }
+
+    var pts1=[],pts2=[];
+    for(var i=0;i<=years;i++){
+      pts1.push(xp(i)+","+yp(s1.series[i]));
+      pts2.push(xp(i)+","+yp(s2.series[i]));
+    }
+
+    var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" style="display:block;">';
+
+    // Grid lines
+    [0,0.5,1].forEach(function(pct){
+      var gy=(padT+chartH*(1-pct)).toFixed(1);
+      svg+='<line x1="'+padL+'" y1="'+gy+'" x2="'+(W-padR)+'" y2="'+gy+'" stroke="#e5e7eb" stroke-width="1"/>';
+    });
+
+    // Lines
+    svg+='<polyline points="'+pts1.join(" ")+'" fill="none" stroke="#2ecc71" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+    svg+='<polyline points="'+pts2.join(" ")+'" fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+
+    // Dots with tooltips
+    for(var i=0;i<=years;i++){
+      svg+='<circle cx="'+xp(i)+'" cy="'+yp(s1.series[i])+'" r="3" fill="#2ecc71"><title>Yr '+i+' — '+rcPlanName(s1.key)+': '+rcMoney(s1.series[i])+'</title></circle>';
+      svg+='<circle cx="'+xp(i)+'" cy="'+yp(s2.series[i])+'" r="3" fill="#e74c3c"><title>Yr '+i+' — '+rcPlanName(s2.key)+': '+rcMoney(s2.series[i])+'</title></circle>';
+    }
+
+    // X-axis year labels
+    var labelEvery=Math.max(1,Math.ceil(years/8));
+    for(var i=0;i<=years;i++){
+      if(i%labelEvery===0||i===years){
+        svg+='<text x="'+xp(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="9" fill="#6b7280">'+i+'</text>';
+      }
+    }
+
+    // Legend — stacked vertically so it fits narrow screens
+    var n1=rcPlanName(s1.key), n2=rcPlanName(s2.key);
+    svg+='<line x1="'+padL+'" y1="10" x2="'+(padL+14)+'" y2="10" stroke="#2ecc71" stroke-width="2.5" stroke-linecap="round"/>';
+    svg+='<text x="'+(padL+18)+'" y="13" font-size="9" fill="#374151">'+n1+'</text>';
+    svg+='<line x1="'+padL+'" y1="20" x2="'+(padL+14)+'" y2="20" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round"/>';
+    svg+='<text x="'+(padL+18)+'" y="23" font-size="9" fill="#374151">'+n2+'</text>';
+
+    svg+='</svg>';
+    container.innerHTML=svg;
+  }
+
+  function rcRenderTable(selected, priority){
+    var t=rcEl("summaryTable");
+    var headers=["Feature"].concat(selected.map(rcPlanName));
+    var feat=function(name,map){ return [name].concat(selected.map(function(k){return map[k]||"—";})); };
+    var rows=[
+      feat("Downside Risk",{fia:'<span class="rc-badge good">Protected</span>',fixed:'<span class="rc-badge good">Protected</span>',variable:'<span class="rc-badge mid">Market-linked</span>',mf:'<span class="rc-badge bad">Market-linked</span>',bonds:'<span class="rc-badge mid">Lower risk</span>'}),
+      feat("Fees/Costs",{fia:'<span class="rc-badge mid">Varies</span>',fixed:'<span class="rc-badge good">Low</span>',variable:'<span class="rc-badge bad">Higher</span>',mf:'<span class="rc-badge mid">Mgmt fee</span>',bonds:'<span class="rc-badge mid">Low-mid</span>'}),
+      feat("Growth Upside",{fia:'<span class="rc-badge mid">Capped</span>',fixed:'<span class="rc-badge bad">Lower</span>',variable:'<span class="rc-badge good">Higher</span>',mf:'<span class="rc-badge good">Higher</span>',bonds:'<span class="rc-badge bad">Lower</span>'}),
+      feat("Income Options",{fia:'<span class="rc-badge good">Strong</span>',fixed:'<span class="rc-badge good">Strong</span>',variable:'<span class="rc-badge mid">Possible</span>',mf:'<span class="rc-badge bad">No guarantee</span>',bonds:'<span class="rc-badge bad">No guarantee</span>'}),
+      feat("Inflation Handling",{fia:'<span class="rc-badge mid">Depends</span>',fixed:'<span class="rc-badge bad">Weaker</span>',variable:'<span class="rc-badge good">Better</span>',mf:'<span class="rc-badge good">Better</span>',bonds:'<span class="rc-badge mid">Moderate</span>'})
+    ];
+    var html="<tr>"+headers.map(function(h){return "<th>"+h+"</th>";}).join("")+"</tr>";
+    html+=rows.map(function(r){
+      return "<tr>"+r.map(function(c,i){ return i===0?"<td style='font-weight:900;'>"+c+"</td>":"<td>"+c+"</td>"; }).join("")+"</tr>";
+    }).join("");
+    t.innerHTML=html;
+  }
+
+  // ========= DEFAULTS =========
+  (function(){
+    var fia=rcEl("pick_fia"), mf=rcEl("pick_mf");
+    if(fia){ fia.checked=true; rcState.picks.add("fia"); }
+    if(mf){  mf.checked=true;  rcState.picks.add("mf");  }
+    rcUpdateChoiceStyles();
+  })();
+</script>
+
+</body>
+</html>

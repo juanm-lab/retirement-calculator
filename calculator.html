@@ -349,7 +349,7 @@
 
     <div style="margin-top:16px;">
       <div style="font-weight:900; margin-bottom:8px;">Growth Over Time (Year-by-Year)</div>
-      <div class="rc-miniChart" id="growthChart"></div>
+      <div id="growthChart" style="overflow-x:auto; border:1px solid var(--border); border-radius:12px; background:#fff; padding:4px;"></div>
       <div class="rc-note">Each year shows your top 2 selected plans (green/red) for quick comparison.</div>
     </div>
 
@@ -395,6 +395,7 @@
     ["step1","step2","step3","step4"].forEach(function(s,i){
       rcEl(s).style.display = (i+1===step) ? "block" : "none";
     });
+    rcEl("rc").scrollIntoView({behavior:"smooth", block:"start"});
   }
 
   // Called by inline onclick on every nav button — no addEventListener needed.
@@ -603,23 +604,66 @@
   }
 
   function rcRenderGrowth(topTwo, years){
-    var chart=rcEl("growthChart"); chart.innerHTML="";
+    var container=rcEl("growthChart"); container.innerHTML="";
     if(topTwo.length<2) return;
     var s1=topTwo[0], s2=topTwo[1];
-    var maxV=Math.max.apply(null, s1.series.concat(s2.series));
+    var allVals=s1.series.concat(s2.series);
+    var maxV=Math.max.apply(null,allVals);
+    var minV=Math.min.apply(null,allVals);
+    var range=maxV-minV||1;
+
+    var padL=10, padR=16, padT=22, padB=28;
+    var perYear=32;
+    var W=Math.max(padL+padR+years*perYear, 400);
+    var H=200;
+    var chartH=H-padT-padB;
+    var chartW=W-padL-padR;
+
+    function xp(i){ return (padL+(i/years)*chartW).toFixed(1); }
+    function yp(v){ return (padT+chartH*(1-(v-minV)/range)).toFixed(1); }
+
+    var pts1=[],pts2=[];
     for(var i=0;i<=years;i++){
-      var col=document.createElement("div"); col.className="rc-yearCol";
-      col.title="Year "+i+"\n"+rcPlanName(s1.key)+": "+rcMoney(s1.series[i])+"\n"+rcPlanName(s2.key)+": "+rcMoney(s2.series[i]);
-      var pair=document.createElement("div"); pair.className="rc-barPair";
-      var h1=maxV?(s1.series[i]/maxV)*165:0;
-      var h2=maxV?(s2.series[i]/maxV)*165:0;
-      var b1=document.createElement("div"); b1.className="rc-b g"; b1.style.setProperty("height",rcClamp(h1,0,165)+"px","important");
-      var b2=document.createElement("div"); b2.className="rc-b r"; b2.style.setProperty("height",rcClamp(h2,0,165)+"px","important");
-      pair.appendChild(b1); pair.appendChild(b2);
-      var lbl=document.createElement("div"); lbl.className="rc-yearLbl"; lbl.textContent=i;
-      col.appendChild(pair); col.appendChild(lbl);
-      chart.appendChild(col);
+      pts1.push(xp(i)+","+yp(s1.series[i]));
+      pts2.push(xp(i)+","+yp(s2.series[i]));
     }
+
+    var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" style="display:block;">';
+
+    // Horizontal grid lines
+    [0,0.5,1].forEach(function(pct){
+      var gy=(padT+chartH*(1-pct)).toFixed(1);
+      svg+='<line x1="'+padL+'" y1="'+gy+'" x2="'+(W-padR)+'" y2="'+gy+'" stroke="#e5e7eb" stroke-width="1"/>';
+    });
+
+    // Plan lines
+    svg+='<polyline points="'+pts1.join(" ")+'" fill="none" stroke="#2ecc71" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+    svg+='<polyline points="'+pts2.join(" ")+'" fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+
+    // Dots with tooltip titles
+    for(var i=0;i<=years;i++){
+      svg+='<circle cx="'+xp(i)+'" cy="'+yp(s1.series[i])+'" r="3" fill="#2ecc71"><title>Yr '+i+' — '+rcPlanName(s1.key)+': '+rcMoney(s1.series[i])+'</title></circle>';
+      svg+='<circle cx="'+xp(i)+'" cy="'+yp(s2.series[i])+'" r="3" fill="#e74c3c"><title>Yr '+i+' — '+rcPlanName(s2.key)+': '+rcMoney(s2.series[i])+'</title></circle>';
+    }
+
+    // X-axis year labels
+    var labelEvery=Math.max(1,Math.ceil(years/10));
+    for(var i=0;i<=years;i++){
+      if(i%labelEvery===0||i===years){
+        svg+='<text x="'+xp(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="9" fill="#6b7280">'+i+'</text>';
+      }
+    }
+
+    // Legend
+    var n1=rcPlanName(s1.key), n2=rcPlanName(s2.key);
+    svg+='<line x1="'+padL+'" y1="10" x2="'+(padL+14)+'" y2="10" stroke="#2ecc71" stroke-width="2.5" stroke-linecap="round"/>';
+    svg+='<text x="'+(padL+18)+'" y="13" font-size="9" fill="#374151">'+n1+'</text>';
+    var leg2x=Math.floor(W/2);
+    svg+='<line x1="'+leg2x+'" y1="10" x2="'+(leg2x+14)+'" y2="10" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round"/>';
+    svg+='<text x="'+(leg2x+18)+'" y="13" font-size="9" fill="#374151">'+n2+'</text>';
+
+    svg+='</svg>';
+    container.innerHTML=svg;
   }
 
   function rcRenderTable(selected, priority){

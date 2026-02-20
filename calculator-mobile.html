@@ -195,7 +195,7 @@
   </div>
 
   <!-- ===== STEP 1 ===== -->
-  <div id="rcStep1">
+  <div id="rcStep1" data-rc-step="1">
     <div class="rc-h3">Step 1 — Your Basics</div>
     <div class="rc-grid">
       <div>
@@ -222,7 +222,7 @@
   </div>
 
   <!-- ===== STEP 2 ===== -->
-  <div id="rcStep2" class="rc-hidden">
+  <div id="rcStep2" data-rc-step="2" class="rc-hidden">
     <div class="rc-h3">Step 2 — Choose What To Compare</div>
     <div class="rc-note" style="text-align:center; margin-bottom:10px;">Pick 2 or 3 plans to compare</div>
 
@@ -327,7 +327,7 @@
   </div>
 
   <!-- ===== STEP 3 ===== -->
-  <div id="rcStep3" class="rc-hidden">
+  <div id="rcStep3" data-rc-step="3" class="rc-hidden">
     <div class="rc-h3">Step 3 — What Matters Most?</div>
     <div class="rc-grid">
       <div>
@@ -380,7 +380,7 @@
   </div>
 
   <!-- ===== STEP 4 ===== -->
-  <div id="rcStep4" class="rc-hidden">
+  <div id="rcStep4" data-rc-step="4" class="rc-hidden">
     <div class="rc-h3">Step 4 — Results</div>
 
     <div class="rc-resultBoxes" id="rcTopResults"></div>
@@ -454,13 +454,20 @@
   function showStep(step){
     rcState.step = step;
     rcSetStepper(step);
-    ["rcStep1","rcStep2","rcStep3","rcStep4"].forEach(function(s,i){
-      var el = rcEl(s);
-      if(!el) return;
-      if(i+1===step){ el.classList.remove("rc-hidden"); }
-      else           { el.classList.add("rc-hidden");    }
+    // Use querySelectorAll on data attribute — avoids any getElementById
+    // issues in GHL's embed context. setProperty with 'important' ensures
+    // no external stylesheet can override the display value.
+    document.querySelectorAll("[data-rc-step]").forEach(function(el){
+      var s = Number(el.getAttribute("data-rc-step"));
+      if(s === step){
+        el.classList.remove("rc-hidden");
+        el.style.setProperty("display","block","important");
+      } else {
+        el.classList.add("rc-hidden");
+        el.style.setProperty("display","none","important");
+      }
     });
-    try{ rcEl("rc").scrollIntoView({behavior:"smooth", block:"start"}); }catch(e){}
+    try{ document.querySelector("#rc").scrollIntoView({behavior:"smooth",block:"start"}); }catch(e){}
   }
 
   function rcNext(from){

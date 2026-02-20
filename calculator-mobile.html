@@ -484,41 +484,49 @@
     if(el) el.textContent = msg;
   }
 
+  // rcCollectPanels: finds all four step panels by their element IDs.
+  // Using getElementById (not querySelectorAll by class) because GHL mobile
+  // can strip arbitrary CSS classes from divs, making class-based queries
+  // return 0 results. IDs are provably preserved (the stepper uses #rcStepper).
+  // Called lazily so it works even when GHL injects HTML after the script runs.
+  function rcCollectPanels(){
+    var ids = ["rcStep1","rcStep2","rcStep3","rcStep4"];
+    rcPanels = [];
+    for(var i = 0; i < ids.length; i++){
+      var el = document.getElementById(ids[i]);
+      if(el) rcPanels.push(el);
+    }
+    return rcPanels.length;
+  }
+
   function showStep(step){
     rcState.step = step;
     rcSetStepper(step);
 
-    var anchor = document.getElementById("rcPanelAnchor");
-
-    if(!anchor || rcPanels.length === 0){
-      // Fallback: CSS-only toggle when DOM-swap infrastructure isn't ready
-      var all = document.querySelectorAll(".rc-step-pnl");
-      all.forEach(function(el, i){
-        el.style.display = (i + 1 === step) ? "block" : "none";
-      });
-      return;
-    }
-
-    var parent = anchor.parentNode;
-
-    // Pull every panel out of the DOM (harmless if already detached)
-    rcPanels.forEach(function(el){
-      if(el.parentNode) el.parentNode.removeChild(el);
-    });
-
-    // Re-insert only the target panel immediately after the anchor node
-    var target = rcPanels[step - 1];
-    if(target && parent){
-      parent.insertBefore(target, anchor.nextSibling);
-      // Clear any inline display:none that was in the original HTML
-      target.style.display = "";
-    }
-
-    // Wire any buttons that just entered the DOM
-    if(typeof rcBindStepBtns === "function") rcBindStepBtns();
+    // Lazy collect — safe whether script ran before or after GHL injects HTML.
+    // Re-collect every time in case GHL re-renders the DOM between calls.
+    rcCollectPanels();
 
     var wrap = rcGetWrap();
-    try{ (wrap||document.body).scrollIntoView({behavior:"smooth",block:"start"}); }catch(e){}
+    if(!wrap || rcPanels.length === 0){ return; }
+
+    // Physically detach every panel from the DOM.
+    // An element not in the DOM cannot be displayed by any CSS rule —
+    // not even a host-page !important override.
+    for(var i = 0; i < rcPanels.length; i++){
+      if(rcPanels[i].parentNode) rcPanels[i].parentNode.removeChild(rcPanels[i]);
+    }
+
+    // Re-attach only the target panel, appended to the wrap.
+    var target = rcPanels[step - 1];
+    if(target){
+      wrap.appendChild(target);
+      // Clear any inline display:none that was in the original HTML markup.
+      target.style.display = "block";
+    }
+
+    rcBindStepBtns();
+    try{ wrap.scrollIntoView({behavior:"smooth",block:"start"}); }catch(e){}
   }
 
   function rcNext(from){
@@ -818,23 +826,10 @@
     if(mf){  mf.checked=true;  rcState.picks.add("mf");  }
     rcUpdateChoiceStyles();
 
-    // ---- DOM-swap setup ----
-    // Collect all step panels into rcPanels[], then physically remove steps 2-4
-    // from the DOM. showStep() re-inserts whichever panel is needed.
-    // This makes navigation immune to any host-page CSS that might force
-    // display:block on arbitrary divs.
-    rcPanels = Array.from(document.querySelectorAll(".rc-step-pnl"));
-    var anchor = document.getElementById("rcPanelAnchor");
-    if(anchor && rcPanels.length > 0){
-      var ap = anchor.parentNode;
-      // Pull all panels out
-      rcPanels.forEach(function(el){ if(el.parentNode) el.parentNode.removeChild(el); });
-      // Put step 1 back, right after the anchor
-      if(ap && rcPanels[0]){
-        ap.insertBefore(rcPanels[0], anchor.nextSibling);
-        rcPanels[0].style.display = "";
-      }
-    }
+    // ---- Panel collection (best-effort at init time) ----
+    // showStep() re-collects lazily on every call, so it's fine if this
+    // returns 0 because GHL hasn't injected the HTML yet.
+    rcCollectPanels();
 
     // ---- Button wiring ----
     // The handler function is shared by all delegation layers.

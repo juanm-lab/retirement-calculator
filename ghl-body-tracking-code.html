@@ -12,101 +12,41 @@ var rcState = { step:1, stress:"normal", picks:new Set(["fia","mf"]) };
 // =====================================================================
 // PANEL MANAGEMENT
 //
-// The root cause of all previous failures:
-//   rcCollectPanels() was called on every showStep().
-//   After the first swap, getElementById() cannot find detached nodes,
-//   so the array was rebuilt with only 1 element and rcPanels[step-1]
-//   was undefined — silently doing nothing.
+// Root cause of all previous failures was CSS specificity:
+//   GHL's host-page stylesheet uses !important rules that override
+//   display:none set by class, inline style, or JS element.style.display.
 //
-// Fix: collect ONCE (rcEnsurePanels), store references permanently.
-//   Also capture rcContainer (the parent div) at collection time,
-//   before any panel is detached, so we never need to re-find the wrap.
+// Fix: element.style.setProperty("display", value, "important")
+//   This creates an inline !important declaration which sits ABOVE any
+//   author stylesheet !important rule in the CSS cascade — it wins
+//   regardless of what GHL's CSS does.
+//
+// No DOM removal/insertion needed. All 4 panels stay in the DOM
+//   at all times; we simply force-show one and force-hide the rest.
 // =====================================================================
-var rcPanels    = null;   // null = not yet collected
-var rcContainer = null;   // parent element, captured before first detach
-var rcNavLast   = 0;      // debounce timestamp
+var rcNavLast = 0; // debounce timestamp
 
-// Collect all four panels by ID. Called once — skipped on repeat calls.
-// Uses getElementById (not querySelectorAll by class) because GHL mobile
-// can strip CSS classes from divs; IDs are preserved (stepper proves it).
-function rcEnsurePanels() {
-  if (rcPanels !== null) return; // already done — never re-collect
-
-  var ids = ["rcStep1","rcStep2","rcStep3","rcStep4"];
-  var found = [];
-  for (var i = 0; i < ids.length; i++) {
-    var el = document.getElementById(ids[i]);
-    if (el) found.push(el);
-  }
-
-  // Fallback 1: data attribute (if IDs were somehow stripped)
-  if (found.length < 4) {
-    found = [];
-    var nl = document.querySelectorAll("[data-rc-step]");
-    for (var i = 0; i < nl.length; i++) found.push(nl[i]);
-  }
-
-  // Fallback 2: class name
-  if (found.length < 4) {
-    found = [];
-    var nl2 = document.querySelectorAll(".rc-step-pnl");
-    for (var i = 0; i < nl2.length; i++) found.push(nl2[i]);
-  }
-
-  rcPanels = found;
-
-  // Capture container NOW, while panel[0] is still attached to the DOM.
-  // This is the element we append into — no dependency on id="rc" or
-  // class="rc-wrap" which GHL may strip.
-  if (rcPanels.length > 0 && rcPanels[0].parentNode) {
-    rcContainer = rcPanels[0].parentNode;
-  }
-}
-
-// Show one step: detach all panels, attach only the target.
-// A detached element cannot be rendered by any CSS rule, including
-// host-page !important overrides — this is why we use DOM removal
-// instead of display:none toggling.
 function showStep(step) {
   rcState.step = step;
   rcSetStepper(step);
 
-  // First call collects panels + records container; subsequent calls skip.
-  rcEnsurePanels();
-  if (!rcPanels || rcPanels.length === 0) return;
-
-  // Resolve container: use what we captured, or find from any panel
-  // still attached (the currently-visible one).
-  var container = rcContainer;
-  if (!container) {
-    for (var i = 0; i < rcPanels.length; i++) {
-      if (rcPanels[i] && rcPanels[i].parentNode) {
-        container = rcPanels[i].parentNode;
-        rcContainer = container;
-        break;
-      }
-    }
-  }
-  if (!container) return;
-
-  // Detach every panel
-  for (var i = 0; i < rcPanels.length; i++) {
-    if (rcPanels[i] && rcPanels[i].parentNode) {
-      rcPanels[i].parentNode.removeChild(rcPanels[i]);
+  var ids = ["rcStep1","rcStep2","rcStep3","rcStep4"];
+  for (var i = 0; i < ids.length; i++) {
+    var el = document.getElementById(ids[i]);
+    if (!el) continue;
+    if (i + 1 === step) {
+      el.style.setProperty("display", "block", "important");
+    } else {
+      el.style.setProperty("display", "none", "important");
     }
   }
 
-  // Attach only the target
-  var target = rcPanels[step - 1];
-  if (target) {
-    container.appendChild(target);
-    target.style.display = "block"; // clear any inline display:none from HTML
-  }
-
-  // Wire direct listeners on buttons that just entered the DOM
   rcWireButtons();
 
-  try { container.scrollIntoView({ behavior:"smooth", block:"start" }); } catch(e) {}
+  try {
+    var top = document.getElementById("rcStepper");
+    if (top) top.scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch(e) {}
 }
 
 // =====================================================================
@@ -536,19 +476,25 @@ function rcWireButtons() {
 // INIT
 // =====================================================================
 function rcInit() {
-  if (window.rcInitialized) return; window.rcInitialized = true;
+  if (window.rcInitialized) return;
+  window.rcInitialized = true;
+
+  // Force correct panel visibility using !important inline styles.
+  // Called as showStep(1) so the initial state is always enforced,
+  // even if GHL CSS tried to show all panels.
+  showStep(1);
+
   // Checkbox defaults
   var fia = rcEl("pick_fia"), mf = rcEl("pick_mf");
   if (fia) { fia.checked = true; rcState.picks.add("fia"); }
   if (mf)  { mf.checked  = true; rcState.picks.add("mf");  }
   rcUpdateChoiceStyles();
 
-  // Wire step-1 buttons (only panel in DOM at init time)
+  // Wire direct button listeners
   rcWireButtons();
 
-  // Document-level click delegation — catches nav clicks regardless of
-  // whether onclick attributes were stripped by GHL, and regardless of
-  // which panel is currently in the DOM.
+  // Document-level click delegation — catches nav clicks even if GHL
+  // strips onclick attributes from the custom code element HTML.
   document.addEventListener("click", function(e) {
     var btn = rcFindNavBtn(e.target);
     if (!btn) return;
@@ -556,10 +502,24 @@ function rcInit() {
   });
 }
 
-// Run after DOM is ready, whether GHL moved the script or not
+// GHL body tracking code may run BEFORE GHL injects the custom code
+// element's HTML into the page. We poll until rcStep1 appears, then init.
+function rcTryInit() {
+  if (document.getElementById("rcStep1")) {
+    rcInit();
+  } else {
+    var t = setInterval(function() {
+      if (document.getElementById("rcStep1")) {
+        clearInterval(t);
+        rcInit();
+      }
+    }, 100);
+  }
+}
+
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", rcInit);
+  document.addEventListener("DOMContentLoaded", rcTryInit);
 } else {
-  rcInit();
+  rcTryInit();
 }
 </script>

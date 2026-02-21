@@ -18,8 +18,8 @@
     --green:#2ecc71;
     --red:#e74c3c;
     --border:#d6dde6;
-    --shadow: 0 4px 16px rgba(0,0,0,0.10);
-    --radius: 14px;
+    --shadow:0 4px 16px rgba(0,0,0,0.10);
+    --radius:14px;
   }
 
   *{ box-sizing:border-box; }
@@ -32,11 +32,9 @@
     box-shadow:var(--shadow); padding:18px 16px 28px;
   }
 
-  /* ---- Title ---- */
   .rc-title{ font-size:22px; text-align:center; margin:0 0 6px; color:var(--ink); font-weight:900; line-height:1.2; }
   .rc-sub{ margin:0 0 16px; text-align:center; color:var(--muted); font-size:14px; line-height:1.5; }
 
-  /* ---- Stepper ---- */
   .rc-stepper{
     display:flex; gap:0; margin:0 0 16px;
     border-radius:999px; overflow:hidden; border:1px solid var(--border); background:var(--soft);
@@ -47,60 +45,43 @@
   }
   .rc-pill.active{ background:var(--blue); color:#fff; }
 
-  /* ---- Cards ---- */
   .rc-card{
     background:var(--card); border:1px solid var(--border);
     border-radius:12px; padding:14px; margin-top:12px;
   }
 
-  /* ---- All grids are single-column on mobile ---- */
-  .rc-grid, .rc-grid-3{ display:flex; flex-direction:column; gap:12px; }
+  .rc-grid,.rc-grid-3{ display:flex; flex-direction:column; gap:12px; }
 
-  /* ---- Labels & inputs ---- */
   .rc-label{ font-weight:800; color:#111; font-size:14px; display:block; margin-bottom:4px; }
-  .rc-input, .rc-select{
+  .rc-input,.rc-select{
     width:100%; padding:12px 14px; border:1px solid #cfd6df; border-radius:10px;
-    /* 16px minimum prevents iOS from zooming on focus */
     font-size:16px; outline:none; background:#fff; -webkit-appearance:none; appearance:none;
   }
-  .rc-input:focus, .rc-select:focus{ border-color:var(--blue); box-shadow:0 0 0 3px rgba(30,100,226,.15); }
+  .rc-input:focus,.rc-select:focus{ border-color:var(--blue); box-shadow:0 0 0 3px rgba(30,100,226,.15); }
   .rc-note{ font-size:12px; color:var(--muted); line-height:1.4; margin-top:6px; }
 
-  /* ---- Buttons ---- */
   .rc-btn{
     display:block; width:100%; padding:15px 14px;
     border-radius:12px; border:none; background:var(--blue); color:#fff;
     font-weight:900; cursor:pointer; font-size:17px; text-align:center;
     min-height:52px; line-height:1;
-    /* prevent double-tap zoom */
     touch-action:manipulation;
-    /* sit above any host-page overlay that could swallow taps */
-    position:relative; z-index:10;
-    pointer-events:auto;
+    position:relative; z-index:10; pointer-events:auto;
   }
   .rc-btn.secondary{ background:#0f2f63; }
-  .rc-btn.ghost{
-    background:transparent; color:var(--ink);
-    border:1px solid var(--border);
-  }
+  .rc-btn.ghost{ background:transparent; color:var(--ink); border:1px solid var(--border); }
   .rc-btn:disabled{ opacity:.5; cursor:not-allowed; }
 
-  /* Paired nav rows: back (ghost, narrower) + next (fill, wider) */
   .rc-nav{ display:flex; gap:10px; margin-top:16px; }
   .rc-nav .rc-btn.ghost{ flex:0 0 80px; width:80px; font-size:15px; }
   .rc-nav .rc-btn:not(.ghost){ flex:1; }
-
-  /* Single-button row */
   .rc-nav-end{ margin-top:16px; }
 
-  /* ---- Plan choice cards ---- */
   .rc-choice{
     display:flex; align-items:center; gap:12px;
     border:1px solid var(--border); border-radius:12px; padding:14px;
     cursor:pointer; user-select:none; background:#fff;
-    /* large touch target */
-    min-height:60px;
-    touch-action:manipulation;
+    min-height:60px; touch-action:manipulation;
     position:relative; z-index:10; pointer-events:auto;
   }
   .rc-choice input{ width:22px; height:22px; flex-shrink:0; pointer-events:none; accent-color:var(--blue); }
@@ -108,7 +89,6 @@
   .rc-choice small{ display:block; color:var(--muted); margin-top:2px; font-size:13px; }
   .rc-choice.selected{ border-color:var(--blue); box-shadow:0 0 0 3px rgba(30,100,226,.12); background:#f4f8ff; }
 
-  /* ---- Stress tags ---- */
   .rc-stress{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
   .rc-tag{
     padding:11px 14px; border-radius:999px; border:1px solid var(--border);
@@ -118,7 +98,6 @@
   }
   .rc-tag.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
 
-  /* ---- Result boxes ---- */
   .rc-resultBoxes{ display:flex; flex-direction:column; gap:10px; }
   .rc-box{ width:100%; border-radius:14px; padding:14px 16px; text-align:center; border:3px solid #ccc; }
   .rc-box h4{ margin:0; font-size:16px; font-weight:900; }
@@ -130,12 +109,10 @@
   .rc-box.blue{ background:#eef5ff; border-color:var(--blue); }
   .rc-box.blue .rc-val{ color:var(--blue); }
 
-  /* ---- Misc ---- */
   .rc-hr{ border:0; border-top:1px solid var(--border); margin:16px 0; }
   .rc-h3{ margin:0 0 10px; text-align:center; font-size:19px; font-weight:900; color:#111; }
   .rc-center{ text-align:center; }
 
-  /* ---- Final-value bars ---- */
   .rc-barWrap{ background:var(--soft); border-radius:12px; padding:12px; }
   .rc-barRow{ display:flex; align-items:center; gap:8px; margin:8px 0; }
   .rc-barLbl{ width:80px; font-weight:900; font-size:12px; flex-shrink:0; }
@@ -143,17 +120,15 @@
   .rc-barFill{ height:16px; width:0%; background:#999; }
   .rc-barVal{ width:85px; text-align:right; font-weight:900; font-size:12px; flex-shrink:0; }
 
-  /* ---- Growth line chart ---- */
   .rc-chartWrap{
     overflow-x:auto; border:1px solid var(--border);
     border-radius:12px; background:#fff; padding:4px;
     -webkit-overflow-scrolling:touch;
   }
 
-  /* ---- Comparison table — scrollable horizontally ---- */
   .rc-tableWrap{ overflow-x:auto; border-radius:12px; border:1px solid var(--border); -webkit-overflow-scrolling:touch; }
   .rc-table{ width:100%; border-collapse:collapse; min-width:340px; }
-  .rc-table th, .rc-table td{ padding:11px 10px; border-bottom:1px solid var(--border); font-size:13px; white-space:nowrap; }
+  .rc-table th,.rc-table td{ padding:11px 10px; border-bottom:1px solid var(--border); font-size:13px; white-space:nowrap; }
   .rc-table th{ background:#f7fafc; text-align:left; font-weight:900; }
   .rc-table tr:last-child td{ border-bottom:none; }
   .rc-badge{ display:inline-block; padding:4px 9px; border-radius:999px; font-size:12px; font-weight:900; }
@@ -161,21 +136,9 @@
   .rc-badge.bad{ background:#fff1f1; color:#a61b1b; }
   .rc-badge.mid{ background:#fff7e6; color:#8b5a00; }
 
-  /* ---- Step heading ---- */
-  .rc-h3{ margin:0 0 10px; text-align:center; font-size:19px; font-weight:900; color:#111; }
-  .rc-center{ text-align:center; }
-
-  /* ---- Step visibility — class-based so GHL can't strip it ---- */
-  .rc-hidden{ display:none !important; }
-
-  /* ---- Monthly income display ---- */
   .rc-incomeVal{ font-size:34px; font-weight:900; color:var(--ink); margin-top:4px; }
 
-  /* ---- CTA block ---- */
-  .rc-cta{
-    margin-top:16px; padding:16px; border-radius:14px;
-    background:#eef5ff; border:2px solid #a9c6ff;
-  }
+  .rc-cta{ margin-top:16px; padding:16px; border-radius:14px; background:#eef5ff; border:2px solid #a9c6ff; }
   .rc-ctaTitle{ font-size:17px; font-weight:900; margin-bottom:6px; color:var(--ink); }
   .rc-ctaBody{ color:#1f2937; line-height:1.55; font-size:14px; }
   .rc-ctaBtn{
@@ -191,22 +154,15 @@
   <div class="rc-title">Compare Annuities &amp; Retirement Plans</div>
   <div class="rc-sub">See projected growth and estimated monthly income to find the best retirement strategy for you.</div>
 
-  <!-- Stepper -->
   <div class="rc-stepper" id="rcStepper">
     <div class="rc-pill active" data-step="1">1) Basics</div>
     <div class="rc-pill" data-step="2">2) Compare</div>
     <div class="rc-pill" data-step="3">3) Priorities</div>
     <div class="rc-pill" data-step="4">4) Results</div>
   </div>
-  <!-- Debug status: shows which step fired and how many panels were found.
-       Helps diagnose GHL embed issues without needing browser dev tools. -->
-  <div id="rcStatus" style="text-align:center;font-size:11px;color:#999;min-height:14px;margin-bottom:4px;"></div>
 
-  <!-- Anchor: panels are DOM-swapped in/out here so no CSS can keep them visible -->
-  <div id="rcPanelAnchor"></div>
-
-  <!-- ===== STEP 1 ===== -->
-  <div class="rc-step-pnl" id="rcStep1">
+  <!-- STEP 1 — visible on load -->
+  <div id="rcStep1">
     <div class="rc-h3">Step 1 — Your Basics</div>
     <div class="rc-grid">
       <div>
@@ -227,57 +183,35 @@
       </div>
     </div>
     <div class="rc-nav-end">
-      <button type="button" class="rc-btn" id="rcBN1" name="nav-next-1" ontouchend="event.preventDefault();rcNext(1);" onclick="rcNext(1)">Next →</button>
+      <button type="button" class="rc-btn" id="rcBN1" name="nav-next-1" onclick="rcNext(1)">Next &#8594;</button>
     </div>
     <div class="rc-note" style="margin-top:12px;">Tip: You will be able to compare multiple different retirement strategies and rates to see which one suits you best.</div>
   </div>
 
-  <!-- ===== STEP 2 ===== -->
-  <!-- Steps 2-4: inline display:none so they're hidden even before JS runs.
-       JS will physically remove them from the DOM immediately on init. -->
-  <div class="rc-step-pnl" id="rcStep2" style="display:none">
+  <!-- STEP 2 — hidden until JS swaps it in -->
+  <div id="rcStep2" style="display:none">
     <div class="rc-h3">Step 2 — Choose What To Compare</div>
-    <div class="rc-note" style="text-align:center; margin-bottom:10px;">Pick 2 or 3 plans to compare</div>
-
+    <div class="rc-note" style="text-align:center;margin-bottom:10px;">Pick 2 or 3 plans to compare</div>
     <div class="rc-grid">
       <div class="rc-choice" onclick="rcTogglePlan('fia')">
         <input type="checkbox" id="pick_fia">
-        <div>
-          <strong>Indexed Annuity (FIA)</strong>
-          <small>Cap + principal protection (no losses in this model)</small>
-        </div>
+        <div><strong>Indexed Annuity (FIA)</strong><small>Cap + principal protection (no losses in this model)</small></div>
       </div>
-
       <div class="rc-choice" onclick="rcTogglePlan('fixed')">
         <input type="checkbox" id="pick_fixed">
-        <div>
-          <strong>Fixed Annuity</strong>
-          <small>Stable credited rate — lower upside, high certainty</small>
-        </div>
+        <div><strong>Fixed Annuity</strong><small>Stable credited rate — lower upside, high certainty</small></div>
       </div>
-
       <div class="rc-choice" onclick="rcTogglePlan('variable')">
         <input type="checkbox" id="pick_variable">
-        <div>
-          <strong>Variable Annuity</strong>
-          <small>Market-like returns, product costs (simplified)</small>
-        </div>
+        <div><strong>Variable Annuity</strong><small>Market-like returns, product costs (simplified)</small></div>
       </div>
-
       <div class="rc-choice" onclick="rcTogglePlan('mf')">
         <input type="checkbox" id="pick_mf">
-        <div>
-          <strong>Mutual Fund</strong>
-          <small>Market return minus management fees</small>
-        </div>
+        <div><strong>Mutual Fund</strong><small>Market return minus management fees</small></div>
       </div>
-
       <div class="rc-choice" onclick="rcTogglePlan('bonds')">
         <input type="checkbox" id="pick_bonds">
-        <div>
-          <strong>Bond Portfolio</strong>
-          <small>Lower return, smoother path (simplified)</small>
-        </div>
+        <div><strong>Bond Portfolio</strong><small>Lower return, smoother path (simplified)</small></div>
       </div>
     </div>
 
@@ -313,7 +247,7 @@
         <div>
           <label class="rc-label" for="rcVaFee">Variable Annuity Fee (%)</label>
           <input class="rc-input" id="rcVaFee" type="number" value="2.5" step="0.1" inputmode="decimal">
-          <div class="rc-note">VA ≈ market return − VA costs.</div>
+          <div class="rc-note">VA &#8776; market return &#8722; VA costs.</div>
         </div>
         <div>
           <label class="rc-label" for="rcBondReturn">Bond Portfolio Return (%)</label>
@@ -334,13 +268,13 @@
     </div>
 
     <div class="rc-nav">
-      <button type="button" class="rc-btn ghost" id="rcBB2" name="nav-back-2" ontouchend="event.preventDefault();rcBack(2);" onclick="rcBack(2)">← Back</button>
-      <button type="button" class="rc-btn" id="rcBN2" name="nav-next-2" ontouchend="event.preventDefault();rcNext(2);" onclick="rcNext(2)">Next →</button>
+      <button type="button" class="rc-btn ghost" id="rcBB2" name="nav-back-2" onclick="rcBack(2)">&#8592; Back</button>
+      <button type="button" class="rc-btn" id="rcBN2" name="nav-next-2" onclick="rcNext(2)">Next &#8594;</button>
     </div>
   </div>
 
-  <!-- ===== STEP 3 ===== -->
-  <div class="rc-step-pnl" id="rcStep3" style="display:none">
+  <!-- STEP 3 -->
+  <div id="rcStep3" style="display:none">
     <div class="rc-h3">Step 3 — What Matters Most?</div>
     <div class="rc-grid">
       <div>
@@ -387,510 +321,612 @@
       </div>
     </div>
     <div class="rc-nav">
-      <button type="button" class="rc-btn ghost" id="rcBB3" name="nav-back-3" ontouchend="event.preventDefault();rcBack(3);" onclick="rcBack(3)">← Back</button>
-      <button type="button" class="rc-btn" id="rcBN3" name="nav-next-3" ontouchend="event.preventDefault();rcNext(3);" onclick="rcNext(3)">See Results →</button>
+      <button type="button" class="rc-btn ghost" id="rcBB3" name="nav-back-3" onclick="rcBack(3)">&#8592; Back</button>
+      <button type="button" class="rc-btn" id="rcBN3" name="nav-next-3" onclick="rcNext(3)">See Results &#8594;</button>
     </div>
   </div>
 
-  <!-- ===== STEP 4 ===== -->
-  <div class="rc-step-pnl" id="rcStep4" style="display:none">
+  <!-- STEP 4 -->
+  <div id="rcStep4" style="display:none">
     <div class="rc-h3">Step 4 — Results</div>
-
     <div class="rc-resultBoxes" id="rcTopResults"></div>
-
     <div class="rc-hr"></div>
-
     <div class="rc-center">
-      <div style="font-weight:900; font-size:15px; color:#111;">Estimated Monthly Income</div>
-      <div id="rcMonthlyIncome" class="rc-incomeVal">—</div>
+      <div style="font-weight:900;font-size:15px;color:#111;">Estimated Monthly Income</div>
+      <div id="rcMonthlyIncome" class="rc-incomeVal">&#8212;</div>
     </div>
-
-    <!-- CTA -->
     <div class="rc-cta">
       <div class="rc-ctaTitle">We found the right expert type for your needs</div>
       <div id="ctaBody" class="rc-ctaBody"></div>
-      <a id="ctaLink" class="rc-ctaBtn" href="#">Find My Expert Match →</a>
+      <a id="ctaLink" class="rc-ctaBtn" href="#">Find My Expert Match &#8594;</a>
     </div>
-
     <div class="rc-hr"></div>
-
     <div class="rc-h3" style="margin-bottom:10px;">Visual Breakdown</div>
-
     <div class="rc-barWrap">
-      <div style="font-weight:900; font-size:13px; margin-bottom:6px;">Final Values (Selected Plans)</div>
+      <div style="font-weight:900;font-size:13px;margin-bottom:6px;">Final Values (Selected Plans)</div>
       <div id="barArea"></div>
       <div class="rc-note">Bars normalized to top plan value.</div>
     </div>
-
     <div style="margin-top:16px;">
-      <div style="font-weight:900; font-size:14px; margin-bottom:8px;">Growth Over Time (Year-by-Year)</div>
+      <div style="font-weight:900;font-size:14px;margin-bottom:8px;">Growth Over Time (Year-by-Year)</div>
       <div id="growthChart" class="rc-chartWrap"></div>
       <div class="rc-note">Scroll sideways to see all years. Top 2 plans shown.</div>
     </div>
-
     <div class="rc-hr"></div>
-
     <div class="rc-h3">Comparison Summary</div>
     <div class="rc-tableWrap">
       <table class="rc-table" id="summaryTable"></table>
     </div>
-
     <div class="rc-nav" style="margin-top:16px;">
-      <button type="button" class="rc-btn ghost" id="rcBB4" name="nav-back-4" ontouchend="event.preventDefault();rcBack(4);" onclick="rcBack(4)">← Back</button>
-      <button type="button" class="rc-btn secondary" id="rcBRS" name="nav-restart" ontouchend="event.preventDefault();rcRestart();" onclick="rcRestart()">Start Over</button>
+      <button type="button" class="rc-btn ghost" id="rcBB4" name="nav-back-4" onclick="rcBack(4)">&#8592; Back</button>
+      <button type="button" class="rc-btn secondary" id="rcBRS" name="nav-restart" onclick="rcRestart()">Start Over</button>
     </div>
   </div>
-</div>
+</div><!-- end .rc-wrap -->
 
 <script>
-  // ========= CONFIG =========
-  var EXPERT_MATCH_URL = "https://primeretirementhub.com/find-an-expert";
+// =====================================================================
+// CONFIG
+// =====================================================================
+var EXPERT_MATCH_URL = "https://primeretirementhub.com/find-an-expert";
 
-  // ========= STATE =========
-  var rcState = {
-    step: 1,
-    stress: "normal",
-    picks: new Set(["fia","mf"])
-  };
+// =====================================================================
+// STATE
+// =====================================================================
+var rcState = { step:1, stress:"normal", picks:new Set(["fia","mf"]) };
 
-  // All four step panels, collected once in rcInit.
-  // showStep physically moves the active one in/out of the DOM so that
-  // no host-page CSS override can force a hidden panel to remain visible.
-  var rcPanels = [];
+// =====================================================================
+// PANEL MANAGEMENT
+//
+// The root cause of all previous failures:
+//   rcCollectPanels() was called on every showStep().
+//   After the first swap, getElementById() cannot find detached nodes,
+//   so the array was rebuilt with only 1 element and rcPanels[step-1]
+//   was undefined — silently doing nothing.
+//
+// Fix: collect ONCE (rcEnsurePanels), store references permanently.
+//   Also capture rcContainer (the parent div) at collection time,
+//   before any panel is detached, so we never need to re-find the wrap.
+// =====================================================================
+var rcPanels    = null;   // null = not yet collected
+var rcContainer = null;   // parent element, captured before first detach
+var rcNavLast   = 0;      // debounce timestamp
 
-  // ========= HELPERS =========
-  function rcEl(id){ return document.getElementById(id); }
-  function rcMoney(n){ return "$"+Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
-  function rcClamp(n,lo,hi){ return Math.max(lo,Math.min(hi,n)); }
+// Collect all four panels by ID. Called once — skipped on repeat calls.
+// Uses getElementById (not querySelectorAll by class) because GHL mobile
+// can strip CSS classes from divs; IDs are preserved (stepper proves it).
+function rcEnsurePanels() {
+  if (rcPanels !== null) return; // already done — never re-collect
 
-  function rcSetStepper(step){
-    document.querySelectorAll("#rcStepper .rc-pill").forEach(function(p){
-      p.classList.toggle("active", Number(p.dataset.step)===step);
-    });
+  var ids = ["rcStep1","rcStep2","rcStep3","rcStep4"];
+  var found = [];
+  for (var i = 0; i < ids.length; i++) {
+    var el = document.getElementById(ids[i]);
+    if (el) found.push(el);
   }
 
-  // rcWrap: reference to the outermost container, resolved once.
-  // Scoping all queries to this element prevents accidentally
-  // toggling GHL-duplicated copies of the HTML.
-  var rcWrap = null;
-  function rcGetWrap(){
-    if(rcWrap) return rcWrap;
-    rcWrap = document.getElementById("rc") || document.querySelector(".rc-wrap");
-    return rcWrap;
+  // Fallback 1: data attribute (if IDs were somehow stripped)
+  if (found.length < 4) {
+    found = [];
+    var nl = document.querySelectorAll("[data-rc-step]");
+    for (var i = 0; i < nl.length; i++) found.push(nl[i]);
   }
 
-  function rcDbg(msg){
-    var el = document.getElementById("rcStatus");
-    if(el) el.textContent = msg;
+  // Fallback 2: class name
+  if (found.length < 4) {
+    found = [];
+    var nl2 = document.querySelectorAll(".rc-step-pnl");
+    for (var i = 0; i < nl2.length; i++) found.push(nl2[i]);
   }
 
-  // rcCollectPanels: finds all four step panels by their element IDs.
-  // Using getElementById (not querySelectorAll by class) because GHL mobile
-  // can strip arbitrary CSS classes from divs, making class-based queries
-  // return 0 results. IDs are provably preserved (the stepper uses #rcStepper).
-  // Called lazily so it works even when GHL injects HTML after the script runs.
-  function rcCollectPanels(){
-    var ids = ["rcStep1","rcStep2","rcStep3","rcStep4"];
-    rcPanels = [];
-    for(var i = 0; i < ids.length; i++){
-      var el = document.getElementById(ids[i]);
-      if(el) rcPanels.push(el);
+  rcPanels = found;
+
+  // Capture container NOW, while panel[0] is still attached to the DOM.
+  // This is the element we append into — no dependency on id="rc" or
+  // class="rc-wrap" which GHL may strip.
+  if (rcPanels.length > 0 && rcPanels[0].parentNode) {
+    rcContainer = rcPanels[0].parentNode;
+  }
+}
+
+// Show one step: detach all panels, attach only the target.
+// A detached element cannot be rendered by any CSS rule, including
+// host-page !important overrides — this is why we use DOM removal
+// instead of display:none toggling.
+function showStep(step) {
+  rcState.step = step;
+  rcSetStepper(step);
+
+  // First call collects panels + records container; subsequent calls skip.
+  rcEnsurePanels();
+  if (!rcPanels || rcPanels.length === 0) return;
+
+  // Resolve container: use what we captured, or find from any panel
+  // still attached (the currently-visible one).
+  var container = rcContainer;
+  if (!container) {
+    for (var i = 0; i < rcPanels.length; i++) {
+      if (rcPanels[i] && rcPanels[i].parentNode) {
+        container = rcPanels[i].parentNode;
+        rcContainer = container;
+        break;
+      }
     }
-    return rcPanels.length;
+  }
+  if (!container) return;
+
+  // Detach every panel
+  for (var i = 0; i < rcPanels.length; i++) {
+    if (rcPanels[i] && rcPanels[i].parentNode) {
+      rcPanels[i].parentNode.removeChild(rcPanels[i]);
+    }
   }
 
-  function showStep(step){
-    rcState.step = step;
-    rcSetStepper(step);
-
-    // Lazy collect — safe whether script ran before or after GHL injects HTML.
-    // Re-collect every time in case GHL re-renders the DOM between calls.
-    rcCollectPanels();
-
-    var wrap = rcGetWrap();
-    if(!wrap || rcPanels.length === 0){ return; }
-
-    // Physically detach every panel from the DOM.
-    // An element not in the DOM cannot be displayed by any CSS rule —
-    // not even a host-page !important override.
-    for(var i = 0; i < rcPanels.length; i++){
-      if(rcPanels[i].parentNode) rcPanels[i].parentNode.removeChild(rcPanels[i]);
-    }
-
-    // Re-attach only the target panel, appended to the wrap.
-    var target = rcPanels[step - 1];
-    if(target){
-      wrap.appendChild(target);
-      // Clear any inline display:none that was in the original HTML markup.
-      target.style.display = "block";
-    }
-
-    rcBindStepBtns();
-    try{ wrap.scrollIntoView({behavior:"smooth",block:"start"}); }catch(e){}
+  // Attach only the target
+  var target = rcPanels[step - 1];
+  if (target) {
+    container.appendChild(target);
+    target.style.display = "block"; // clear any inline display:none from HTML
   }
 
-  function rcNext(from){
-    rcDbg("rcNext("+from+") fired");
-    try{
-      if(from===1){
+  // Wire direct listeners on buttons that just entered the DOM
+  rcWireButtons();
+
+  try { container.scrollIntoView({ behavior:"smooth", block:"start" }); } catch(e) {}
+}
+
+// =====================================================================
+// STEPPER — for loops + getAttribute to avoid NodeList.forEach /
+// classList.toggle(force) / dataset which may be absent on old WebViews
+// =====================================================================
+function rcSetStepper(step) {
+  var pills = document.querySelectorAll("#rcStepper .rc-pill");
+  for (var i = 0; i < pills.length; i++) {
+    var s = Number(pills[i].getAttribute("data-step"));
+    if (s === step) pills[i].classList.add("active");
+    else            pills[i].classList.remove("active");
+  }
+}
+
+// =====================================================================
+// HELPERS
+// =====================================================================
+function rcEl(id) { return document.getElementById(id); }
+
+function rcMoney(n) {
+  return "$" + Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function rcClamp(n,lo,hi) { return Math.max(lo, Math.min(hi, n)); }
+
+// Walk up from a click target to find a button whose name starts with "nav-".
+// Replaces element.closest() which may not exist on old mobile WebViews.
+function rcFindNavBtn(el) {
+  while (el && el.tagName) {
+    if (el.tagName === "BUTTON") {
+      var name = el.getAttribute ? (el.getAttribute("name") || "") : "";
+      return (name.indexOf("nav-") === 0) ? el : null;
+    }
+    el = el.parentNode;
+  }
+  return null;
+}
+
+// Dispatch a nav button action by its name attribute value.
+function rcHandleNav(name) {
+  if      (name === "nav-next-1")  rcNext(1);
+  else if (name === "nav-back-2")  rcBack(2);
+  else if (name === "nav-next-2")  rcNext(2);
+  else if (name === "nav-back-3")  rcBack(3);
+  else if (name === "nav-next-3")  rcNext(3);
+  else if (name === "nav-back-4")  rcBack(4);
+  else if (name === "nav-restart") rcRestart();
+}
+
+// =====================================================================
+// NAVIGATION
+// =====================================================================
+
+// Debounce guard: prevents double-execution when onclick AND the
+// document delegation both fire for the same tap (within 400ms).
+function rcDebounced(fn) {
+  var now = Date.now ? Date.now() : new Date().getTime();
+  if (now - rcNavLast < 400) return;
+  rcNavLast = now;
+  fn();
+}
+
+function rcNext(from) {
+  rcDebounced(function() {
+    try {
+      if (from === 1) {
         var el1 = rcEl("rcInitialAmount"), el2 = rcEl("rcYears");
-        var initial = el1 ? Number(el1.value||0) : 0;
-        var yrs     = el2 ? Number(el2.value||0) : 0;
-        if(initial<=0 || yrs<1){ alert("Please enter a valid amount and at least 1 year."); return; }
+        var amt = el1 ? Number(el1.value || 0) : 0;
+        var yrs = el2 ? Number(el2.value || 0) : 0;
+        if (amt <= 0 || yrs < 1) { alert("Please enter a valid amount and at least 1 year."); return; }
       }
-      if(from===2){
-        if(rcState.picks.size<2){ alert("Pick at least 2 plans to compare."); return; }
+      if (from === 2 && rcState.picks.size < 2) {
+        alert("Pick at least 2 plans to compare.");
+        return;
       }
-      showStep(from+1);
-      if(from+1===4) rcRun();
-    }catch(e){ alert("rcNext error: "+(e&&e.message?e.message:e)); }
-  }
+      showStep(from + 1);
+      if (from + 1 === 4) rcRun();
+    } catch(e) { alert("Error: " + (e && e.message ? e.message : String(e))); }
+  });
+}
 
-  function rcBack(current){ showStep(current-1); }
+function rcBack(current) {
+  rcDebounced(function() { showStep(current - 1); });
+}
 
-  function rcRestart(){
-    rcState = {step:1, stress:"normal", picks:new Set(["fia","mf"])};
-    rcEl("pick_fia").checked = true;
-    rcEl("pick_mf").checked = true;
-    ["fixed","variable","bonds"].forEach(function(k){ rcEl("pick_"+k).checked = false; });
+function rcRestart() {
+  rcDebounced(function() {
+    rcState = { step:1, stress:"normal", picks:new Set(["fia","mf"]) };
+    var fia = rcEl("pick_fia"), mf = rcEl("pick_mf");
+    if (fia) fia.checked = true;
+    if (mf)  mf.checked  = true;
+    var others = ["fixed","variable","bonds"];
+    for (var i = 0; i < others.length; i++) {
+      var cb = rcEl("pick_" + others[i]);
+      if (cb) cb.checked = false;
+    }
     rcSetStress("normal");
     rcUpdateChoiceStyles();
     showStep(1);
+  });
+}
+
+// =====================================================================
+// PLAN SELECTION
+// =====================================================================
+function rcTogglePlan(key) {
+  var cb = rcEl("pick_" + key);
+  if (!cb) return;
+  var nowChecked = !cb.checked;
+  if (nowChecked && rcState.picks.size >= 3) { alert("You can compare up to 3 plans at a time."); return; }
+  if (!nowChecked && rcState.picks.size <= 2) { alert("Please keep at least 2 selected for a comparison."); return; }
+  cb.checked = nowChecked;
+  if (nowChecked) rcState.picks.add(key); else rcState.picks.delete(key);
+  rcUpdateChoiceStyles();
+}
+
+function rcUpdateChoiceStyles() {
+  var keys = ["fia","fixed","variable","mf","bonds"];
+  for (var i = 0; i < keys.length; i++) {
+    var cb = rcEl("pick_" + keys[i]);
+    if (!cb) continue;
+    // Checkbox is a direct child of its .rc-choice card
+    var card = cb.parentNode;
+    if (!card) continue;
+    if (cb.checked) card.classList.add("selected");
+    else            card.classList.remove("selected");
+  }
+}
+
+// =====================================================================
+// STRESS SCENARIOS
+// =====================================================================
+function rcSetStress(mode) {
+  rcState.stress = mode;
+  var modes = ["normal","2008","2022","flat"];
+  for (var i = 0; i < modes.length; i++) {
+    var el = rcEl("stress_" + modes[i]);
+    if (!el) continue;
+    if (modes[i] === mode) el.classList.add("active");
+    else                   el.classList.remove("active");
+  }
+}
+
+// =====================================================================
+// SIMULATION
+// =====================================================================
+function rcBuildMarketSeries(years, avgReturn, stress) {
+  var wiggles = [0.02,-0.01,0.015,-0.005,0.01,-0.015,0.005,0.0,0.012,-0.008];
+  var base = [];
+  for (var i = 0; i < years; i++) base.push(avgReturn + wiggles[i % wiggles.length]);
+
+  if (stress === "flat") {
+    var flat = [];
+    for (var i = 0; i < years; i++) flat.push(0);
+    return flat;
+  }
+  if (stress === "2022") {
+    var s = base.slice();
+    if (years >= 1) s[0] = -0.18;
+    for (var j = 1; j < years; j++) s[j] = Math.min(s[j], avgReturn + 0.02);
+    return s;
+  }
+  if (stress === "2008") {
+    var s2 = base.slice();
+    if (years >= 1) s2[0] = -0.38;
+    if (years >= 2) s2[1] = 0.18;
+    if (years >= 3) s2[2] = 0.12;
+    return s2;
+  }
+  return base;
+}
+
+function rcSimulatePlan(planKey, initial, years, params) {
+  var cap=params.cap, ms=params.ms, mf=params.mf, fr=params.fr, vf=params.vf, br=params.br;
+  var v = initial, series = [v];
+  for (var i = 0; i < years; i++) {
+    var r = ms[i];
+    if      (planKey === "fia")      v *= (1 + Math.max(Math.min(r, cap), 0));
+    else if (planKey === "mf")       v *= (1 + r - mf);
+    else if (planKey === "fixed")    v *= (1 + fr);
+    else if (planKey === "variable") v *= (1 + r - vf);
+    else if (planKey === "bonds")    v *= (1 + br);
+    series.push(v);
+  }
+  return { final:v, series:series };
+}
+
+function rcPlanName(key) {
+  var m = { fia:"Indexed Annuity (FIA)", mf:"Mutual Fund (MF)", fixed:"Fixed Annuity", variable:"Variable Annuity", bonds:"Bond Portfolio" };
+  return m[key] || key;
+}
+
+function rcPlanColor(key) {
+  return (key==="fia"||key==="fixed") ? "green" : (key==="mf"||key==="variable") ? "red" : "blue";
+}
+
+// =====================================================================
+// RUN & RENDER
+// =====================================================================
+function rcRun() {
+  var initial    = Number(rcEl("rcInitialAmount").value || 0);
+  var years      = Number(rcEl("rcYears").value || 10);
+  var age        = Number(rcEl("rcAge").value || 55);
+  var stateName  = (rcEl("rcState").value || "").trim();
+  var cap        = Number(rcEl("rcCapRate").value || 0) / 100;
+  var avgMkt     = Number(rcEl("rcMarketReturn").value || 0) / 100;
+  var infl       = Number(rcEl("rcInflation").value || 0) / 100;
+  var mfFee      = Number(rcEl("rcMgmtFee").value || 0) / 100;
+  var fr         = Number(rcEl("rcFixedRate").value || 0) / 100;
+  var vf         = Number(rcEl("rcVaFee").value || 0) / 100;
+  var br         = Number(rcEl("rcBondReturn").value || 0) / 100;
+  var priority   = rcEl("rcPriority").value;
+  var goal       = rcEl("rcGoal").value;
+  var retireAge  = Number(rcEl("rcRetireAge").value || 65);
+  var incomeMode = rcEl("rcIncomeMode").value;
+  var payoutRate = Number(rcEl("rcPayoutRate").value || 5) / 100;
+  var incomeYears= Number(rcEl("rcIncomeYears").value || 25);
+
+  var ms = rcBuildMarketSeries(years, avgMkt, rcState.stress);
+  var params = { cap:cap, ms:ms, mf:mfFee, fr:fr, vf:vf, br:br };
+
+  // Build selected array from Set (avoid Array.from — may be absent on old WebViews)
+  var selected = [];
+  rcState.picks.forEach(function(k) { selected.push(k); });
+
+  // Simulate each plan (avoid Object.assign — may be absent on old WebViews)
+  var sims = [];
+  for (var i = 0; i < selected.length; i++) {
+    var k   = selected[i];
+    var sim = rcSimulatePlan(k, initial, years, params);
+    sims.push({ key:k, final:sim.final, series:sim.series });
+  }
+  sims.sort(function(a,b) { return b.final - a.final; });
+
+  // Result boxes
+  var topEl = rcEl("rcTopResults");
+  topEl.innerHTML = "";
+  for (var i = 0; i < sims.length; i++) {
+    var box = document.createElement("div");
+    box.className = "rc-box " + rcPlanColor(sims[i].key);
+    box.innerHTML = "<h4>" + rcPlanName(sims[i].key) + "</h4><div class='rc-val'>" + rcMoney(sims[i].final) + "</div>";
+    topEl.appendChild(box);
   }
 
-  // ========= PLAN SELECTION =========
-  function rcTogglePlan(key){
-    var cb = rcEl("pick_"+key);
-    var nowChecked = !cb.checked;
-    if(nowChecked && rcState.picks.size>=3){
-      alert("You can compare up to 3 plans at a time.");
-      return;
+  // Monthly income
+  var best   = sims[0];
+  var annual = (incomeMode === "rule4") ? best.final * 0.04 : best.final * payoutRate;
+  var monthly= annual / 12;
+  rcEl("rcMonthlyIncome").textContent = rcMoney(monthly);
+
+  // Expert type
+  var expertType = "Retirement Planning Specialist";
+  if (priority === "income")     expertType = "Guaranteed Income Specialist";
+  if (priority === "protection") expertType = "Principal Protection (FIA/Fixed) Specialist";
+  if (priority === "growth")     expertType = "Growth & Allocation Retirement Strategist";
+  if (priority === "tax")        expertType = "Tax-Aware Retirement Planner";
+  if (priority === "legacy")     expertType = "Legacy & Beneficiary Planning Specialist";
+
+  var lines = [];
+  lines.push("Based on your inputs, <strong>" + rcPlanName(best.key) + "</strong> projected highest under the selected scenario (" + rcState.stress + ").");
+  if (priority === "protection") lines.push("You prioritized <strong>principal protection</strong>, which often aligns with fixed or indexed annuity strategies.");
+  if (priority === "income")     lines.push("You prioritized <strong>guaranteed income</strong>, so we'll match you with an income-focused annuity expert.");
+  if (priority === "growth")     lines.push("You prioritized <strong>growth</strong>, so we'll match you with someone who can compare capped protection vs. market allocation.");
+  if (goal === "rates")          lines.push("You selected <strong>finding the best annuity rates</strong>, so we'll match you with an expert who tracks competitive rate environments.");
+  lines.push("We'll match you with a <strong>" + expertType + "</strong> licensed in your area" + (stateName ? " (" + stateName.toUpperCase() + ")" : "") + ".");
+  rcEl("ctaBody").innerHTML = lines.join(" ");
+
+  // Build query string without URLSearchParams (may be absent on old WebViews)
+  function qe(v) { return encodeURIComponent(String(v)); }
+  var qs = "amount=" + qe(initial) + "&years=" + qe(years) + "&age=" + qe(age)
+    + "&state=" + qe(stateName) + "&stress=" + qe(rcState.stress)
+    + "&picks=" + qe(selected.join(",")) + "&best=" + qe(best.key)
+    + "&capRate=" + qe((cap*100).toFixed(2))
+    + "&marketReturn=" + qe((avgMkt*100).toFixed(2))
+    + "&mgmtFee=" + qe((mfFee*100).toFixed(2))
+    + "&fixedRate=" + qe((fr*100).toFixed(2))
+    + "&vaFee=" + qe((vf*100).toFixed(2))
+    + "&bondReturn=" + qe((br*100).toFixed(2))
+    + "&inflation=" + qe((infl*100).toFixed(2))
+    + "&priority=" + qe(priority) + "&goal=" + qe(goal)
+    + "&retireAge=" + qe(retireAge) + "&incomeMode=" + qe(incomeMode)
+    + "&payoutRate=" + qe((payoutRate*100).toFixed(2))
+    + "&incomeYears=" + qe(incomeYears)
+    + "&estMonthly=" + qe(monthly.toFixed(2));
+  rcEl("ctaLink").href = EXPERT_MATCH_URL + "?" + qs;
+
+  rcRenderBars(sims);
+  rcRenderGrowth(sims.slice(0,2), years);
+  rcRenderTable(selected, priority);
+}
+
+function rcRenderBars(sims) {
+  var area = rcEl("barArea");
+  area.innerHTML = "";
+  var maxV = 0;
+  for (var i = 0; i < sims.length; i++) if (sims[i].final > maxV) maxV = sims[i].final;
+  for (var i = 0; i < sims.length; i++) {
+    var s   = sims[i];
+    var pct = maxV ? (s.final / maxV) * 100 : 0;
+    var row = document.createElement("div"); row.className = "rc-barRow";
+    var lbl = document.createElement("div"); lbl.className = "rc-barLbl";
+    lbl.textContent = rcPlanName(s.key).replace(" (FIA)","").replace(" (MF)","");
+    var bg   = document.createElement("div"); bg.className = "rc-barBg";
+    var fill = document.createElement("div"); fill.className = "rc-barFill";
+    fill.style.width = rcClamp(pct,0,100) + "%";
+    var col = rcPlanColor(s.key);
+    fill.style.background = col==="green" ? "var(--green)" : col==="red" ? "var(--red)" : "var(--blue)";
+    bg.appendChild(fill);
+    var val = document.createElement("div"); val.className = "rc-barVal";
+    val.textContent = rcMoney(s.final);
+    row.appendChild(lbl); row.appendChild(bg); row.appendChild(val);
+    area.appendChild(row);
+  }
+}
+
+function rcRenderGrowth(topTwo, years) {
+  var wrap = rcEl("growthChart");
+  wrap.innerHTML = "";
+  if (topTwo.length < 2) return;
+  var s1 = topTwo[0], s2 = topTwo[1];
+  var allVals = s1.series.concat(s2.series);
+  var maxV = Math.max.apply(null, allVals);
+  var minV = Math.min.apply(null, allVals);
+  var range = maxV - minV || 1;
+
+  var padL=10, padR=16, padT=22, padB=28, perYear=26;
+  var W = Math.max(padL + padR + years * perYear, wrap.offsetWidth || 320);
+  var H = 180, chartH = H-padT-padB, chartW = W-padL-padR;
+
+  function xp(i) { return (padL + (i/years)*chartW).toFixed(1); }
+  function yp(v) { return (padT + chartH*(1-(v-minV)/range)).toFixed(1); }
+
+  var pts1 = [], pts2 = [];
+  for (var i = 0; i <= years; i++) {
+    pts1.push(xp(i) + "," + yp(s1.series[i]));
+    pts2.push(xp(i) + "," + yp(s2.series[i]));
+  }
+
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" style="display:block;">';
+  var gridPcts = [0, 0.5, 1];
+  for (var g = 0; g < gridPcts.length; g++) {
+    var gy = (padT + chartH*(1-gridPcts[g])).toFixed(1);
+    svg += '<line x1="'+padL+'" y1="'+gy+'" x2="'+(W-padR)+'" y2="'+gy+'" stroke="#e5e7eb" stroke-width="1"/>';
+  }
+  svg += '<polyline points="'+pts1.join(" ")+'" fill="none" stroke="#2ecc71" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  svg += '<polyline points="'+pts2.join(" ")+'" fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  for (var i = 0; i <= years; i++) {
+    svg += '<circle cx="'+xp(i)+'" cy="'+yp(s1.series[i])+'" r="3" fill="#2ecc71"><title>Yr '+i+' \u2014 '+rcPlanName(s1.key)+': '+rcMoney(s1.series[i])+'</title></circle>';
+    svg += '<circle cx="'+xp(i)+'" cy="'+yp(s2.series[i])+'" r="3" fill="#e74c3c"><title>Yr '+i+' \u2014 '+rcPlanName(s2.key)+': '+rcMoney(s2.series[i])+'</title></circle>';
+  }
+  var labelEvery = Math.max(1, Math.ceil(years/8));
+  for (var i = 0; i <= years; i++) {
+    if (i % labelEvery === 0 || i === years) {
+      svg += '<text x="'+xp(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="9" fill="#6b7280">'+i+'</text>';
     }
-    if(!nowChecked && rcState.picks.size<=2){
-      alert("Please keep at least 2 selected for a comparison.");
-      return;
+  }
+  svg += '<line x1="'+padL+'" y1="10" x2="'+(padL+14)+'" y2="10" stroke="#2ecc71" stroke-width="2.5" stroke-linecap="round"/>';
+  svg += '<text x="'+(padL+18)+'" y="13" font-size="9" fill="#374151">'+rcPlanName(s1.key)+'</text>';
+  svg += '<line x1="'+padL+'" y1="20" x2="'+(padL+14)+'" y2="20" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round"/>';
+  svg += '<text x="'+(padL+18)+'" y="23" font-size="9" fill="#374151">'+rcPlanName(s2.key)+'</text>';
+  svg += '</svg>';
+  wrap.innerHTML = svg;
+}
+
+function rcRenderTable(selected, priority) {
+  var t = rcEl("summaryTable");
+  var headers = ["Feature"];
+  for (var i = 0; i < selected.length; i++) headers.push(rcPlanName(selected[i]));
+
+  var riskMap     = { fia:'<span class="rc-badge good">Protected</span>',fixed:'<span class="rc-badge good">Protected</span>',variable:'<span class="rc-badge mid">Market-linked</span>',mf:'<span class="rc-badge bad">Market-linked</span>',bonds:'<span class="rc-badge mid">Lower risk</span>' };
+  var feeMap      = { fia:'<span class="rc-badge mid">Varies</span>',fixed:'<span class="rc-badge good">Low</span>',variable:'<span class="rc-badge bad">Higher</span>',mf:'<span class="rc-badge mid">Mgmt fee</span>',bonds:'<span class="rc-badge mid">Low-mid</span>' };
+  var growthMap   = { fia:'<span class="rc-badge mid">Capped</span>',fixed:'<span class="rc-badge bad">Lower</span>',variable:'<span class="rc-badge good">Higher</span>',mf:'<span class="rc-badge good">Higher</span>',bonds:'<span class="rc-badge bad">Lower</span>' };
+  var incomeMap   = { fia:'<span class="rc-badge good">Strong</span>',fixed:'<span class="rc-badge good">Strong</span>',variable:'<span class="rc-badge mid">Possible</span>',mf:'<span class="rc-badge bad">No guarantee</span>',bonds:'<span class="rc-badge bad">No guarantee</span>' };
+  var inflMap     = { fia:'<span class="rc-badge mid">Depends</span>',fixed:'<span class="rc-badge bad">Weaker</span>',variable:'<span class="rc-badge good">Better</span>',mf:'<span class="rc-badge good">Better</span>',bonds:'<span class="rc-badge mid">Moderate</span>' };
+
+  var rowDefs = [
+    { label:"Downside Risk",      map:riskMap   },
+    { label:"Fees/Costs",         map:feeMap    },
+    { label:"Growth Upside",      map:growthMap },
+    { label:"Income Options",     map:incomeMap },
+    { label:"Inflation Handling", map:inflMap   }
+  ];
+
+  var html = "<tr>";
+  for (var i = 0; i < headers.length; i++) html += "<th>" + headers[i] + "</th>";
+  html += "</tr>";
+
+  for (var r = 0; r < rowDefs.length; r++) {
+    html += "<tr><td style='font-weight:900'>" + rowDefs[r].label + "</td>";
+    for (var i = 0; i < selected.length; i++) {
+      html += "<td>" + (rowDefs[r].map[selected[i]] || "&#8212;") + "</td>";
     }
-    cb.checked = nowChecked;
-    if(nowChecked){ rcState.picks.add(key); } else { rcState.picks.delete(key); }
-    rcUpdateChoiceStyles();
+    html += "</tr>";
   }
+  t.innerHTML = html;
+}
 
-  function rcUpdateChoiceStyles(){
-    ["fia","fixed","variable","mf","bonds"].forEach(function(k){
-      var cb = rcEl("pick_"+k);
-      if(!cb) return;
-      var card = cb.closest(".rc-choice");
-      if(card) card.classList.toggle("selected", cb.checked);
-    });
+// =====================================================================
+// BUTTON WIRING
+//
+// rcWireButtons() is called from showStep() every time a panel enters
+// the DOM, so buttons in panels 2-4 (which were detached at init time)
+// get their direct listeners attached when they become visible.
+// =====================================================================
+var rcBound = {};
+
+function rcWireButtons() {
+  var specs = [
+    ["rcBN1", function(){ rcNext(1); }],
+    ["rcBB2", function(){ rcBack(2); }],
+    ["rcBN2", function(){ rcNext(2); }],
+    ["rcBB3", function(){ rcBack(3); }],
+    ["rcBN3", function(){ rcNext(3); }],
+    ["rcBB4", function(){ rcBack(4); }],
+    ["rcBRS", function(){ rcRestart(); }]
+  ];
+  for (var i = 0; i < specs.length; i++) {
+    var id = specs[i][0], fn = specs[i][1];
+    if (rcBound[id]) continue;
+    var el = document.getElementById(id);
+    if (el) { el.addEventListener("click", fn); rcBound[id] = true; }
   }
+}
 
-  // ========= STRESS SCENARIOS =========
-  function rcSetStress(mode){
-    rcState.stress = mode;
-    ["normal","2008","2022","flat"].forEach(function(m){
-      rcEl("stress_"+m).classList.toggle("active", m===mode);
-    });
-  }
+// =====================================================================
+// INIT
+// =====================================================================
+function rcInit() {
+  // Checkbox defaults
+  var fia = rcEl("pick_fia"), mf = rcEl("pick_mf");
+  if (fia) { fia.checked = true; rcState.picks.add("fia"); }
+  if (mf)  { mf.checked  = true; rcState.picks.add("mf");  }
+  rcUpdateChoiceStyles();
 
-  // ========= SIMULATION =========
-  function rcBuildMarketSeries(years, avgReturn, stress){
-    var wiggles = [0.02,-0.01,0.015,-0.005,0.01,-0.015,0.005,0.0,0.012,-0.008];
-    var base = [];
-    for(var i=0;i<years;i++) base.push(avgReturn + wiggles[i % wiggles.length]);
+  // Wire step-1 buttons (only panel in DOM at init time)
+  rcWireButtons();
 
-    if(stress==="flat") return base.map(function(){ return 0; });
-    if(stress==="2022"){
-      var s = base.slice();
-      if(years>=1) s[0]=-0.18;
-      for(var j=1;j<years;j++) s[j]=Math.min(s[j], avgReturn+0.02);
-      return s;
-    }
-    if(stress==="2008"){
-      var s2 = base.slice();
-      if(years>=1) s2[0]=-0.38;
-      if(years>=2) s2[1]=0.18;
-      if(years>=3) s2[2]=0.12;
-      return s2;
-    }
-    return base;
-  }
+  // Document-level click delegation — catches nav clicks regardless of
+  // whether onclick attributes were stripped by GHL, and regardless of
+  // which panel is currently in the DOM.
+  document.addEventListener("click", function(e) {
+    var btn = rcFindNavBtn(e.target);
+    if (!btn) return;
+    rcHandleNav(btn.getAttribute("name") || "");
+  });
+}
 
-  function rcSimulatePlan(planKey, initial, years, params){
-    var cap=params.cap, ms=params.ms, mf=params.mf, fr=params.fr, vf=params.vf, br=params.br;
-    var v=initial, series=[v];
-    for(var i=0;i<years;i++){
-      var r=ms[i];
-      if(planKey==="fia")           v*=(1+Math.max(Math.min(r,cap),0));
-      else if(planKey==="mf")       v*=(1+r-mf);
-      else if(planKey==="fixed")    v*=(1+fr);
-      else if(planKey==="variable") v*=(1+r-vf);
-      else if(planKey==="bonds")    v*=(1+br);
-      series.push(v);
-    }
-    return {final:v, series:series};
-  }
-
-  function rcPlanName(key){
-    return ({fia:"Indexed Annuity (FIA)",mf:"Mutual Fund (MF)",fixed:"Fixed Annuity",variable:"Variable Annuity",bonds:"Bond Portfolio"})[key]||key;
-  }
-  function rcPlanColor(key){ return (key==="fia"||key==="fixed")?"green":(key==="mf"||key==="variable")?"red":"blue"; }
-
-  // ========= RUN & RENDER =========
-  function rcRun(){
-    var initial   = Number(rcEl("rcInitialAmount").value||0);
-    var years     = Number(rcEl("rcYears").value||10);
-    var age       = Number(rcEl("rcAge").value||55);
-    var state     = (rcEl("rcState").value||"").trim();
-    var cap       = Number(rcEl("rcCapRate").value||0)/100;
-    var avgMkt    = Number(rcEl("rcMarketReturn").value||0)/100;
-    var infl      = Number(rcEl("rcInflation").value||0)/100;
-    var mf        = Number(rcEl("rcMgmtFee").value||0)/100;
-    var fr        = Number(rcEl("rcFixedRate").value||0)/100;
-    var vf        = Number(rcEl("rcVaFee").value||0)/100;
-    var br        = Number(rcEl("rcBondReturn").value||0)/100;
-    var priority  = rcEl("rcPriority").value;
-    var goal      = rcEl("rcGoal").value;
-    var retireAge   = Number(rcEl("rcRetireAge").value||65);
-    var incomeMode  = rcEl("rcIncomeMode").value;
-    var payoutRate  = Number(rcEl("rcPayoutRate").value||5)/100;
-    var incomeYears = Number(rcEl("rcIncomeYears").value||25);
-
-    var ms = rcBuildMarketSeries(years, avgMkt, rcState.stress);
-    var params = {cap:cap, ms:ms, mf:mf, fr:fr, vf:vf, br:br};
-    var selected = Array.from(rcState.picks);
-
-    var sims = selected.map(function(k){ return Object.assign({key:k}, rcSimulatePlan(k,initial,years,params)); });
-    sims.sort(function(a,b){ return b.final-a.final; });
-
-    // Result boxes
-    var topEl = rcEl("rcTopResults"); topEl.innerHTML="";
-    sims.forEach(function(s){
-      var box=document.createElement("div");
-      box.className="rc-box "+rcPlanColor(s.key);
-      box.innerHTML="<h4>"+rcPlanName(s.key)+"</h4><div class='rc-val'>"+rcMoney(s.final)+"</div>";
-      topEl.appendChild(box);
-    });
-
-    // Monthly income
-    var best = sims[0];
-    var annual = incomeMode==="rule4" ? best.final*0.04 : best.final*payoutRate;
-    var monthly = annual/12;
-    rcEl("rcMonthlyIncome").textContent = rcMoney(monthly);
-
-    // CTA
-    var expertType = (function(){
-      if(priority==="income")     return "Guaranteed Income Specialist";
-      if(priority==="protection") return "Principal Protection (FIA/Fixed) Specialist";
-      if(priority==="growth")     return "Growth & Allocation Retirement Strategist";
-      if(priority==="tax")        return "Tax-Aware Retirement Planner";
-      if(priority==="legacy")     return "Legacy & Beneficiary Planning Specialist";
-      return "Retirement Planning Specialist";
-    })();
-    var lines=[];
-    lines.push("Based on your inputs, <strong>"+rcPlanName(best.key)+"</strong> projected highest under the selected scenario ("+rcState.stress+").");
-    if(priority==="protection") lines.push("You prioritized <strong>principal protection</strong>, which often aligns with fixed or indexed annuity strategies.");
-    if(priority==="income")     lines.push("You prioritized <strong>guaranteed income</strong>, so we'll match you with an income-focused annuity expert.");
-    if(priority==="growth")     lines.push("You prioritized <strong>growth</strong>, so we'll match you with someone who can compare capped protection vs. market allocation.");
-    if(goal==="rates")          lines.push("You selected <strong>finding the best annuity rates</strong>, so we'll match you with an expert who tracks competitive rate environments.");
-    lines.push("We'll match you with a <strong>"+expertType+"</strong> licensed in your area"+(state?" ("+state.toUpperCase()+")":"")+". ");
-    rcEl("ctaBody").innerHTML = lines.join(" ");
-
-    var qp = new URLSearchParams({
-      amount:initial, years:years, age:age, state:state, stress:rcState.stress,
-      picks:selected.join(","), best:best.key,
-      capRate:(cap*100).toFixed(2), marketReturn:(avgMkt*100).toFixed(2),
-      mgmtFee:(mf*100).toFixed(2), fixedRate:(fr*100).toFixed(2),
-      vaFee:(vf*100).toFixed(2), bondReturn:(br*100).toFixed(2),
-      inflation:(infl*100).toFixed(2), priority:priority, goal:goal,
-      retireAge:retireAge, incomeMode:incomeMode,
-      payoutRate:(payoutRate*100).toFixed(2), incomeYears:incomeYears,
-      estMonthly:monthly.toFixed(2)
-    });
-    rcEl("ctaLink").href = EXPERT_MATCH_URL+"?"+qp.toString();
-
-    rcRenderBars(sims);
-    rcRenderGrowth(sims.slice(0,2), years);
-    rcRenderTable(selected, priority);
-    showStep(4);
-  }
-
-  function rcRenderBars(sims){
-    var area=rcEl("barArea"); area.innerHTML="";
-    var maxV=Math.max.apply(null, sims.map(function(s){return s.final;}));
-    sims.forEach(function(s){
-      var pct=maxV?(s.final/maxV)*100:0;
-      var row=document.createElement("div"); row.className="rc-barRow";
-      var lbl=document.createElement("div"); lbl.className="rc-barLbl";
-      lbl.textContent=rcPlanName(s.key).replace(" (FIA)","").replace(" (MF)","");
-      var bg=document.createElement("div"); bg.className="rc-barBg";
-      var fill=document.createElement("div"); fill.className="rc-barFill";
-      fill.style.width=rcClamp(pct,0,100)+"%";
-      fill.style.background=rcPlanColor(s.key)==="green"?"var(--green)":rcPlanColor(s.key)==="red"?"var(--red)":"var(--blue)";
-      bg.appendChild(fill);
-      var val=document.createElement("div"); val.className="rc-barVal"; val.textContent=rcMoney(s.final);
-      row.appendChild(lbl); row.appendChild(bg); row.appendChild(val);
-      area.appendChild(row);
-    });
-  }
-
-  function rcRenderGrowth(topTwo, years){
-    var container=rcEl("growthChart"); container.innerHTML="";
-    if(topTwo.length<2) return;
-    var s1=topTwo[0], s2=topTwo[1];
-    var allVals=s1.series.concat(s2.series);
-    var maxV=Math.max.apply(null,allVals);
-    var minV=Math.min.apply(null,allVals);
-    var range=maxV-minV||1;
-
-    var padL=10, padR=16, padT=22, padB=28;
-    // On mobile use 26px per year so chart isn't too wide, but still scrollable
-    var perYear=26;
-    var W=Math.max(padL+padR+years*perYear, container.offsetWidth||320);
-    var H=180;
-    var chartH=H-padT-padB;
-    var chartW=W-padL-padR;
-
-    function xp(i){ return (padL+(i/years)*chartW).toFixed(1); }
-    function yp(v){ return (padT+chartH*(1-(v-minV)/range)).toFixed(1); }
-
-    var pts1=[],pts2=[];
-    for(var i=0;i<=years;i++){
-      pts1.push(xp(i)+","+yp(s1.series[i]));
-      pts2.push(xp(i)+","+yp(s2.series[i]));
-    }
-
-    var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" style="display:block;">';
-
-    // Grid lines
-    [0,0.5,1].forEach(function(pct){
-      var gy=(padT+chartH*(1-pct)).toFixed(1);
-      svg+='<line x1="'+padL+'" y1="'+gy+'" x2="'+(W-padR)+'" y2="'+gy+'" stroke="#e5e7eb" stroke-width="1"/>';
-    });
-
-    // Lines
-    svg+='<polyline points="'+pts1.join(" ")+'" fill="none" stroke="#2ecc71" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
-    svg+='<polyline points="'+pts2.join(" ")+'" fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
-
-    // Dots with tooltips
-    for(var i=0;i<=years;i++){
-      svg+='<circle cx="'+xp(i)+'" cy="'+yp(s1.series[i])+'" r="3" fill="#2ecc71"><title>Yr '+i+' — '+rcPlanName(s1.key)+': '+rcMoney(s1.series[i])+'</title></circle>';
-      svg+='<circle cx="'+xp(i)+'" cy="'+yp(s2.series[i])+'" r="3" fill="#e74c3c"><title>Yr '+i+' — '+rcPlanName(s2.key)+': '+rcMoney(s2.series[i])+'</title></circle>';
-    }
-
-    // X-axis year labels
-    var labelEvery=Math.max(1,Math.ceil(years/8));
-    for(var i=0;i<=years;i++){
-      if(i%labelEvery===0||i===years){
-        svg+='<text x="'+xp(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="9" fill="#6b7280">'+i+'</text>';
-      }
-    }
-
-    // Legend — stacked vertically so it fits narrow screens
-    var n1=rcPlanName(s1.key), n2=rcPlanName(s2.key);
-    svg+='<line x1="'+padL+'" y1="10" x2="'+(padL+14)+'" y2="10" stroke="#2ecc71" stroke-width="2.5" stroke-linecap="round"/>';
-    svg+='<text x="'+(padL+18)+'" y="13" font-size="9" fill="#374151">'+n1+'</text>';
-    svg+='<line x1="'+padL+'" y1="20" x2="'+(padL+14)+'" y2="20" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round"/>';
-    svg+='<text x="'+(padL+18)+'" y="23" font-size="9" fill="#374151">'+n2+'</text>';
-
-    svg+='</svg>';
-    container.innerHTML=svg;
-  }
-
-  function rcRenderTable(selected, priority){
-    var t=rcEl("summaryTable");
-    var headers=["Feature"].concat(selected.map(rcPlanName));
-    var feat=function(name,map){ return [name].concat(selected.map(function(k){return map[k]||"—";})); };
-    var rows=[
-      feat("Downside Risk",{fia:'<span class="rc-badge good">Protected</span>',fixed:'<span class="rc-badge good">Protected</span>',variable:'<span class="rc-badge mid">Market-linked</span>',mf:'<span class="rc-badge bad">Market-linked</span>',bonds:'<span class="rc-badge mid">Lower risk</span>'}),
-      feat("Fees/Costs",{fia:'<span class="rc-badge mid">Varies</span>',fixed:'<span class="rc-badge good">Low</span>',variable:'<span class="rc-badge bad">Higher</span>',mf:'<span class="rc-badge mid">Mgmt fee</span>',bonds:'<span class="rc-badge mid">Low-mid</span>'}),
-      feat("Growth Upside",{fia:'<span class="rc-badge mid">Capped</span>',fixed:'<span class="rc-badge bad">Lower</span>',variable:'<span class="rc-badge good">Higher</span>',mf:'<span class="rc-badge good">Higher</span>',bonds:'<span class="rc-badge bad">Lower</span>'}),
-      feat("Income Options",{fia:'<span class="rc-badge good">Strong</span>',fixed:'<span class="rc-badge good">Strong</span>',variable:'<span class="rc-badge mid">Possible</span>',mf:'<span class="rc-badge bad">No guarantee</span>',bonds:'<span class="rc-badge bad">No guarantee</span>'}),
-      feat("Inflation Handling",{fia:'<span class="rc-badge mid">Depends</span>',fixed:'<span class="rc-badge bad">Weaker</span>',variable:'<span class="rc-badge good">Better</span>',mf:'<span class="rc-badge good">Better</span>',bonds:'<span class="rc-badge mid">Moderate</span>'})
-    ];
-    var html="<tr>"+headers.map(function(h){return "<th>"+h+"</th>";}).join("")+"</tr>";
-    html+=rows.map(function(r){
-      return "<tr>"+r.map(function(c,i){ return i===0?"<td style='font-weight:900;'>"+c+"</td>":"<td>"+c+"</td>"; }).join("")+"</tr>";
-    }).join("");
-    t.innerHTML=html;
-  }
-
-  // ========= INIT =========
-  // rcInit is called once the DOM is ready.
-  // It (a) sets checkbox defaults and (b) attaches an event-delegation
-  // listener on the whole calculator container so navigation works even
-  // when GHL strips inline onclick attributes.
-  function rcInit(){
-    // ---- Checkbox defaults ----
-    var fia=rcEl("pick_fia"), mf=rcEl("pick_mf");
-    if(fia){ fia.checked=true; rcState.picks.add("fia"); }
-    if(mf){  mf.checked=true;  rcState.picks.add("mf");  }
-    rcUpdateChoiceStyles();
-
-    // ---- Panel collection (best-effort at init time) ----
-    // showStep() re-collects lazily on every call, so it's fine if this
-    // returns 0 because GHL hasn't injected the HTML yet.
-    rcCollectPanels();
-
-    // ---- Button wiring ----
-    // The handler function is shared by all delegation layers.
-    function rcHandleNav(name){
-      if(name==="nav-next-1")      rcNext(1);
-      else if(name==="nav-back-2") rcBack(2);
-      else if(name==="nav-next-2") rcNext(2);
-      else if(name==="nav-back-3") rcBack(3);
-      else if(name==="nav-next-3") rcNext(3);
-      else if(name==="nav-back-4") rcBack(4);
-      else if(name==="nav-restart")rcRestart();
-    }
-
-    // Layer 1: direct addEventListener on step-1 buttons (they're in the DOM now)
-    // Steps 2-4 buttons are not in the DOM yet, so rcBindStepBtns() attaches
-    // their listeners each time showStep inserts a new panel.
-    rcBindStepBtns();
-
-    // Layer 2: delegation on the wrap container
-    var wrap = rcGetWrap();
-    if(wrap){
-      wrap.addEventListener("click", function(e){
-        var btn = e.target && e.target.closest ? e.target.closest("button[name]") : null;
-        if(!btn) return;
-        rcHandleNav(btn.getAttribute("name"));
-      });
-    }
-
-    // Layer 3: document-level delegation — deepest fallback if wrap is null
-    // or event propagation to wrap is blocked by host-page scripts.
-    document.addEventListener("click", function(e){
-      var btn = e.target && e.target.closest ? e.target.closest("button[id^='rcB']") : null;
-      if(!btn) return;
-      rcHandleNav(btn.getAttribute("name")||"");
-    });
-  }
-
-  // Attach click listeners directly to any nav buttons currently in the DOM.
-  // Called after each panel swap so the newly inserted panel's buttons are wired.
-  var _rcBound = {}; // track which IDs already have a listener
-  function rcBindStepBtns(){
-    var map = {
-      rcBN1:function(){ rcNext(1); },
-      rcBB2:function(){ rcBack(2); }, rcBN2:function(){ rcNext(2); },
-      rcBB3:function(){ rcBack(3); }, rcBN3:function(){ rcNext(3); },
-      rcBB4:function(){ rcBack(4); }, rcBRS:function(){ rcRestart(); }
-    };
-    Object.keys(map).forEach(function(id){
-      if(_rcBound[id]) return; // already bound
-      var el = document.getElementById(id);
-      if(el){ el.addEventListener("click", map[id]); _rcBound[id]=true; }
-    });
-  }
-
-  // DOMContentLoaded-safe: if GHL moves the <script> to <head>,
-  // or executes it before our HTML is rendered, wait for ready state.
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", rcInit);
-  } else {
-    rcInit();
-  }
+// Run after DOM is ready, whether GHL moved the script or not
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", rcInit);
+} else {
+  rcInit();
+}
 </script>
 
 </body>

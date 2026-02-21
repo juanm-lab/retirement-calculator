@@ -1,0 +1,565 @@
+<script>
+// =====================================================================
+// CONFIG
+// =====================================================================
+var EXPERT_MATCH_URL = "https://primeretirementhub.com/find-an-expert";
+
+// =====================================================================
+// STATE
+// =====================================================================
+var rcState = { step:1, stress:"normal", picks:new Set(["fia","mf"]) };
+
+// =====================================================================
+// PANEL MANAGEMENT
+//
+// The root cause of all previous failures:
+//   rcCollectPanels() was called on every showStep().
+//   After the first swap, getElementById() cannot find detached nodes,
+//   so the array was rebuilt with only 1 element and rcPanels[step-1]
+//   was undefined — silently doing nothing.
+//
+// Fix: collect ONCE (rcEnsurePanels), store references permanently.
+//   Also capture rcContainer (the parent div) at collection time,
+//   before any panel is detached, so we never need to re-find the wrap.
+// =====================================================================
+var rcPanels    = null;   // null = not yet collected
+var rcContainer = null;   // parent element, captured before first detach
+var rcNavLast   = 0;      // debounce timestamp
+
+// Collect all four panels by ID. Called once — skipped on repeat calls.
+// Uses getElementById (not querySelectorAll by class) because GHL mobile
+// can strip CSS classes from divs; IDs are preserved (stepper proves it).
+function rcEnsurePanels() {
+  if (rcPanels !== null) return; // already done — never re-collect
+
+  var ids = ["rcStep1","rcStep2","rcStep3","rcStep4"];
+  var found = [];
+  for (var i = 0; i < ids.length; i++) {
+    var el = document.getElementById(ids[i]);
+    if (el) found.push(el);
+  }
+
+  // Fallback 1: data attribute (if IDs were somehow stripped)
+  if (found.length < 4) {
+    found = [];
+    var nl = document.querySelectorAll("[data-rc-step]");
+    for (var i = 0; i < nl.length; i++) found.push(nl[i]);
+  }
+
+  // Fallback 2: class name
+  if (found.length < 4) {
+    found = [];
+    var nl2 = document.querySelectorAll(".rc-step-pnl");
+    for (var i = 0; i < nl2.length; i++) found.push(nl2[i]);
+  }
+
+  rcPanels = found;
+
+  // Capture container NOW, while panel[0] is still attached to the DOM.
+  // This is the element we append into — no dependency on id="rc" or
+  // class="rc-wrap" which GHL may strip.
+  if (rcPanels.length > 0 && rcPanels[0].parentNode) {
+    rcContainer = rcPanels[0].parentNode;
+  }
+}
+
+// Show one step: detach all panels, attach only the target.
+// A detached element cannot be rendered by any CSS rule, including
+// host-page !important overrides — this is why we use DOM removal
+// instead of display:none toggling.
+function showStep(step) {
+  rcState.step = step;
+  rcSetStepper(step);
+
+  // First call collects panels + records container; subsequent calls skip.
+  rcEnsurePanels();
+  if (!rcPanels || rcPanels.length === 0) return;
+
+  // Resolve container: use what we captured, or find from any panel
+  // still attached (the currently-visible one).
+  var container = rcContainer;
+  if (!container) {
+    for (var i = 0; i < rcPanels.length; i++) {
+      if (rcPanels[i] && rcPanels[i].parentNode) {
+        container = rcPanels[i].parentNode;
+        rcContainer = container;
+        break;
+      }
+    }
+  }
+  if (!container) return;
+
+  // Detach every panel
+  for (var i = 0; i < rcPanels.length; i++) {
+    if (rcPanels[i] && rcPanels[i].parentNode) {
+      rcPanels[i].parentNode.removeChild(rcPanels[i]);
+    }
+  }
+
+  // Attach only the target
+  var target = rcPanels[step - 1];
+  if (target) {
+    container.appendChild(target);
+    target.style.display = "block"; // clear any inline display:none from HTML
+  }
+
+  // Wire direct listeners on buttons that just entered the DOM
+  rcWireButtons();
+
+  try { container.scrollIntoView({ behavior:"smooth", block:"start" }); } catch(e) {}
+}
+
+// =====================================================================
+// STEPPER — for loops + getAttribute to avoid NodeList.forEach /
+// classList.toggle(force) / dataset which may be absent on old WebViews
+// =====================================================================
+function rcSetStepper(step) {
+  var pills = document.querySelectorAll("#rcStepper .rc-pill");
+  for (var i = 0; i < pills.length; i++) {
+    var s = Number(pills[i].getAttribute("data-step"));
+    if (s === step) pills[i].classList.add("active");
+    else            pills[i].classList.remove("active");
+  }
+}
+
+// =====================================================================
+// HELPERS
+// =====================================================================
+function rcEl(id) { return document.getElementById(id); }
+
+function rcMoney(n) {
+  return "$" + Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function rcClamp(n,lo,hi) { return Math.max(lo, Math.min(hi, n)); }
+
+// Walk up from a click target to find a button whose name starts with "nav-".
+// Replaces element.closest() which may not exist on old mobile WebViews.
+function rcFindNavBtn(el) {
+  while (el && el.tagName) {
+    if (el.tagName === "BUTTON") {
+      var name = el.getAttribute ? (el.getAttribute("name") || "") : "";
+      return (name.indexOf("nav-") === 0) ? el : null;
+    }
+    el = el.parentNode;
+  }
+  return null;
+}
+
+// Dispatch a nav button action by its name attribute value.
+function rcHandleNav(name) {
+  if      (name === "nav-next-1")  rcNext(1);
+  else if (name === "nav-back-2")  rcBack(2);
+  else if (name === "nav-next-2")  rcNext(2);
+  else if (name === "nav-back-3")  rcBack(3);
+  else if (name === "nav-next-3")  rcNext(3);
+  else if (name === "nav-back-4")  rcBack(4);
+  else if (name === "nav-restart") rcRestart();
+}
+
+// =====================================================================
+// NAVIGATION
+// =====================================================================
+
+// Debounce guard: prevents double-execution when onclick AND the
+// document delegation both fire for the same tap (within 400ms).
+function rcDebounced(fn) {
+  var now = Date.now ? Date.now() : new Date().getTime();
+  if (now - rcNavLast < 400) return;
+  rcNavLast = now;
+  fn();
+}
+
+function rcNext(from) {
+  rcDebounced(function() {
+    try {
+      if (from === 1) {
+        var el1 = rcEl("rcInitialAmount"), el2 = rcEl("rcYears");
+        var amt = el1 ? Number(el1.value || 0) : 0;
+        var yrs = el2 ? Number(el2.value || 0) : 0;
+        if (amt <= 0 || yrs < 1) { alert("Please enter a valid amount and at least 1 year."); return; }
+      }
+      if (from === 2 && rcState.picks.size < 2) {
+        alert("Pick at least 2 plans to compare.");
+        return;
+      }
+      showStep(from + 1);
+      if (from + 1 === 4) rcRun();
+    } catch(e) { alert("Error: " + (e && e.message ? e.message : String(e))); }
+  });
+}
+
+function rcBack(current) {
+  rcDebounced(function() { showStep(current - 1); });
+}
+
+function rcRestart() {
+  rcDebounced(function() {
+    rcState = { step:1, stress:"normal", picks:new Set(["fia","mf"]) };
+    var fia = rcEl("pick_fia"), mf = rcEl("pick_mf");
+    if (fia) fia.checked = true;
+    if (mf)  mf.checked  = true;
+    var others = ["fixed","variable","bonds"];
+    for (var i = 0; i < others.length; i++) {
+      var cb = rcEl("pick_" + others[i]);
+      if (cb) cb.checked = false;
+    }
+    rcSetStress("normal");
+    rcUpdateChoiceStyles();
+    showStep(1);
+  });
+}
+
+// =====================================================================
+// PLAN SELECTION
+// =====================================================================
+function rcTogglePlan(key) {
+  var cb = rcEl("pick_" + key);
+  if (!cb) return;
+  var nowChecked = !cb.checked;
+  if (nowChecked && rcState.picks.size >= 3) { alert("You can compare up to 3 plans at a time."); return; }
+  if (!nowChecked && rcState.picks.size <= 2) { alert("Please keep at least 2 selected for a comparison."); return; }
+  cb.checked = nowChecked;
+  if (nowChecked) rcState.picks.add(key); else rcState.picks.delete(key);
+  rcUpdateChoiceStyles();
+}
+
+function rcUpdateChoiceStyles() {
+  var keys = ["fia","fixed","variable","mf","bonds"];
+  for (var i = 0; i < keys.length; i++) {
+    var cb = rcEl("pick_" + keys[i]);
+    if (!cb) continue;
+    // Checkbox is a direct child of its .rc-choice card
+    var card = cb.parentNode;
+    if (!card) continue;
+    if (cb.checked) card.classList.add("selected");
+    else            card.classList.remove("selected");
+  }
+}
+
+// =====================================================================
+// STRESS SCENARIOS
+// =====================================================================
+function rcSetStress(mode) {
+  rcState.stress = mode;
+  var modes = ["normal","2008","2022","flat"];
+  for (var i = 0; i < modes.length; i++) {
+    var el = rcEl("stress_" + modes[i]);
+    if (!el) continue;
+    if (modes[i] === mode) el.classList.add("active");
+    else                   el.classList.remove("active");
+  }
+}
+
+// =====================================================================
+// SIMULATION
+// =====================================================================
+function rcBuildMarketSeries(years, avgReturn, stress) {
+  var wiggles = [0.02,-0.01,0.015,-0.005,0.01,-0.015,0.005,0.0,0.012,-0.008];
+  var base = [];
+  for (var i = 0; i < years; i++) base.push(avgReturn + wiggles[i % wiggles.length]);
+
+  if (stress === "flat") {
+    var flat = [];
+    for (var i = 0; i < years; i++) flat.push(0);
+    return flat;
+  }
+  if (stress === "2022") {
+    var s = base.slice();
+    if (years >= 1) s[0] = -0.18;
+    for (var j = 1; j < years; j++) s[j] = Math.min(s[j], avgReturn + 0.02);
+    return s;
+  }
+  if (stress === "2008") {
+    var s2 = base.slice();
+    if (years >= 1) s2[0] = -0.38;
+    if (years >= 2) s2[1] = 0.18;
+    if (years >= 3) s2[2] = 0.12;
+    return s2;
+  }
+  return base;
+}
+
+function rcSimulatePlan(planKey, initial, years, params) {
+  var cap=params.cap, ms=params.ms, mf=params.mf, fr=params.fr, vf=params.vf, br=params.br;
+  var v = initial, series = [v];
+  for (var i = 0; i < years; i++) {
+    var r = ms[i];
+    if      (planKey === "fia")      v *= (1 + Math.max(Math.min(r, cap), 0));
+    else if (planKey === "mf")       v *= (1 + r - mf);
+    else if (planKey === "fixed")    v *= (1 + fr);
+    else if (planKey === "variable") v *= (1 + r - vf);
+    else if (planKey === "bonds")    v *= (1 + br);
+    series.push(v);
+  }
+  return { final:v, series:series };
+}
+
+function rcPlanName(key) {
+  var m = { fia:"Indexed Annuity (FIA)", mf:"Mutual Fund (MF)", fixed:"Fixed Annuity", variable:"Variable Annuity", bonds:"Bond Portfolio" };
+  return m[key] || key;
+}
+
+function rcPlanColor(key) {
+  return (key==="fia"||key==="fixed") ? "green" : (key==="mf"||key==="variable") ? "red" : "blue";
+}
+
+// =====================================================================
+// RUN & RENDER
+// =====================================================================
+function rcRun() {
+  var initial    = Number(rcEl("rcInitialAmount").value || 0);
+  var years      = Number(rcEl("rcYears").value || 10);
+  var age        = Number(rcEl("rcAge").value || 55);
+  var stateName  = (rcEl("rcState").value || "").trim();
+  var cap        = Number(rcEl("rcCapRate").value || 0) / 100;
+  var avgMkt     = Number(rcEl("rcMarketReturn").value || 0) / 100;
+  var infl       = Number(rcEl("rcInflation").value || 0) / 100;
+  var mfFee      = Number(rcEl("rcMgmtFee").value || 0) / 100;
+  var fr         = Number(rcEl("rcFixedRate").value || 0) / 100;
+  var vf         = Number(rcEl("rcVaFee").value || 0) / 100;
+  var br         = Number(rcEl("rcBondReturn").value || 0) / 100;
+  var priority   = rcEl("rcPriority").value;
+  var goal       = rcEl("rcGoal").value;
+  var retireAge  = Number(rcEl("rcRetireAge").value || 65);
+  var incomeMode = rcEl("rcIncomeMode").value;
+  var payoutRate = Number(rcEl("rcPayoutRate").value || 5) / 100;
+  var incomeYears= Number(rcEl("rcIncomeYears").value || 25);
+
+  var ms = rcBuildMarketSeries(years, avgMkt, rcState.stress);
+  var params = { cap:cap, ms:ms, mf:mfFee, fr:fr, vf:vf, br:br };
+
+  // Build selected array from Set (avoid Array.from — may be absent on old WebViews)
+  var selected = [];
+  rcState.picks.forEach(function(k) { selected.push(k); });
+
+  // Simulate each plan (avoid Object.assign — may be absent on old WebViews)
+  var sims = [];
+  for (var i = 0; i < selected.length; i++) {
+    var k   = selected[i];
+    var sim = rcSimulatePlan(k, initial, years, params);
+    sims.push({ key:k, final:sim.final, series:sim.series });
+  }
+  sims.sort(function(a,b) { return b.final - a.final; });
+
+  // Result boxes
+  var topEl = rcEl("rcTopResults");
+  topEl.innerHTML = "";
+  for (var i = 0; i < sims.length; i++) {
+    var box = document.createElement("div");
+    box.className = "rc-box " + rcPlanColor(sims[i].key);
+    box.innerHTML = "<h4>" + rcPlanName(sims[i].key) + "</h4><div class='rc-val'>" + rcMoney(sims[i].final) + "</div>";
+    topEl.appendChild(box);
+  }
+
+  // Monthly income
+  var best   = sims[0];
+  var annual = (incomeMode === "rule4") ? best.final * 0.04 : best.final * payoutRate;
+  var monthly= annual / 12;
+  rcEl("rcMonthlyIncome").textContent = rcMoney(monthly);
+
+  // Expert type
+  var expertType = "Retirement Planning Specialist";
+  if (priority === "income")     expertType = "Guaranteed Income Specialist";
+  if (priority === "protection") expertType = "Principal Protection (FIA/Fixed) Specialist";
+  if (priority === "growth")     expertType = "Growth & Allocation Retirement Strategist";
+  if (priority === "tax")        expertType = "Tax-Aware Retirement Planner";
+  if (priority === "legacy")     expertType = "Legacy & Beneficiary Planning Specialist";
+
+  var lines = [];
+  lines.push("Based on your inputs, <strong>" + rcPlanName(best.key) + "</strong> projected highest under the selected scenario (" + rcState.stress + ").");
+  if (priority === "protection") lines.push("You prioritized <strong>principal protection</strong>, which often aligns with fixed or indexed annuity strategies.");
+  if (priority === "income")     lines.push("You prioritized <strong>guaranteed income</strong>, so we'll match you with an income-focused annuity expert.");
+  if (priority === "growth")     lines.push("You prioritized <strong>growth</strong>, so we'll match you with someone who can compare capped protection vs. market allocation.");
+  if (goal === "rates")          lines.push("You selected <strong>finding the best annuity rates</strong>, so we'll match you with an expert who tracks competitive rate environments.");
+  lines.push("We'll match you with a <strong>" + expertType + "</strong> licensed in your area" + (stateName ? " (" + stateName.toUpperCase() + ")" : "") + ".");
+  rcEl("ctaBody").innerHTML = lines.join(" ");
+
+  // Build query string without URLSearchParams (may be absent on old WebViews)
+  function qe(v) { return encodeURIComponent(String(v)); }
+  var qs = "amount=" + qe(initial) + "&years=" + qe(years) + "&age=" + qe(age)
+    + "&state=" + qe(stateName) + "&stress=" + qe(rcState.stress)
+    + "&picks=" + qe(selected.join(",")) + "&best=" + qe(best.key)
+    + "&capRate=" + qe((cap*100).toFixed(2))
+    + "&marketReturn=" + qe((avgMkt*100).toFixed(2))
+    + "&mgmtFee=" + qe((mfFee*100).toFixed(2))
+    + "&fixedRate=" + qe((fr*100).toFixed(2))
+    + "&vaFee=" + qe((vf*100).toFixed(2))
+    + "&bondReturn=" + qe((br*100).toFixed(2))
+    + "&inflation=" + qe((infl*100).toFixed(2))
+    + "&priority=" + qe(priority) + "&goal=" + qe(goal)
+    + "&retireAge=" + qe(retireAge) + "&incomeMode=" + qe(incomeMode)
+    + "&payoutRate=" + qe((payoutRate*100).toFixed(2))
+    + "&incomeYears=" + qe(incomeYears)
+    + "&estMonthly=" + qe(monthly.toFixed(2));
+  rcEl("ctaLink").href = EXPERT_MATCH_URL + "?" + qs;
+
+  rcRenderBars(sims);
+  rcRenderGrowth(sims.slice(0,2), years);
+  rcRenderTable(selected, priority);
+}
+
+function rcRenderBars(sims) {
+  var area = rcEl("barArea");
+  area.innerHTML = "";
+  var maxV = 0;
+  for (var i = 0; i < sims.length; i++) if (sims[i].final > maxV) maxV = sims[i].final;
+  for (var i = 0; i < sims.length; i++) {
+    var s   = sims[i];
+    var pct = maxV ? (s.final / maxV) * 100 : 0;
+    var row = document.createElement("div"); row.className = "rc-barRow";
+    var lbl = document.createElement("div"); lbl.className = "rc-barLbl";
+    lbl.textContent = rcPlanName(s.key).replace(" (FIA)","").replace(" (MF)","");
+    var bg   = document.createElement("div"); bg.className = "rc-barBg";
+    var fill = document.createElement("div"); fill.className = "rc-barFill";
+    fill.style.width = rcClamp(pct,0,100) + "%";
+    var col = rcPlanColor(s.key);
+    fill.style.background = col==="green" ? "var(--green)" : col==="red" ? "var(--red)" : "var(--blue)";
+    bg.appendChild(fill);
+    var val = document.createElement("div"); val.className = "rc-barVal";
+    val.textContent = rcMoney(s.final);
+    row.appendChild(lbl); row.appendChild(bg); row.appendChild(val);
+    area.appendChild(row);
+  }
+}
+
+function rcRenderGrowth(topTwo, years) {
+  var wrap = rcEl("growthChart");
+  wrap.innerHTML = "";
+  if (topTwo.length < 2) return;
+  var s1 = topTwo[0], s2 = topTwo[1];
+  var allVals = s1.series.concat(s2.series);
+  var maxV = Math.max.apply(null, allVals);
+  var minV = Math.min.apply(null, allVals);
+  var range = maxV - minV || 1;
+
+  var padL=10, padR=16, padT=22, padB=28, perYear=26;
+  var W = Math.max(padL + padR + years * perYear, wrap.offsetWidth || 320);
+  var H = 180, chartH = H-padT-padB, chartW = W-padL-padR;
+
+  function xp(i) { return (padL + (i/years)*chartW).toFixed(1); }
+  function yp(v) { return (padT + chartH*(1-(v-minV)/range)).toFixed(1); }
+
+  var pts1 = [], pts2 = [];
+  for (var i = 0; i <= years; i++) {
+    pts1.push(xp(i) + "," + yp(s1.series[i]));
+    pts2.push(xp(i) + "," + yp(s2.series[i]));
+  }
+
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" style="display:block;">';
+  var gridPcts = [0, 0.5, 1];
+  for (var g = 0; g < gridPcts.length; g++) {
+    var gy = (padT + chartH*(1-gridPcts[g])).toFixed(1);
+    svg += '<line x1="'+padL+'" y1="'+gy+'" x2="'+(W-padR)+'" y2="'+gy+'" stroke="#e5e7eb" stroke-width="1"/>';
+  }
+  svg += '<polyline points="'+pts1.join(" ")+'" fill="none" stroke="#2ecc71" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  svg += '<polyline points="'+pts2.join(" ")+'" fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  for (var i = 0; i <= years; i++) {
+    svg += '<circle cx="'+xp(i)+'" cy="'+yp(s1.series[i])+'" r="3" fill="#2ecc71"><title>Yr '+i+' \u2014 '+rcPlanName(s1.key)+': '+rcMoney(s1.series[i])+'</title></circle>';
+    svg += '<circle cx="'+xp(i)+'" cy="'+yp(s2.series[i])+'" r="3" fill="#e74c3c"><title>Yr '+i+' \u2014 '+rcPlanName(s2.key)+': '+rcMoney(s2.series[i])+'</title></circle>';
+  }
+  var labelEvery = Math.max(1, Math.ceil(years/8));
+  for (var i = 0; i <= years; i++) {
+    if (i % labelEvery === 0 || i === years) {
+      svg += '<text x="'+xp(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="9" fill="#6b7280">'+i+'</text>';
+    }
+  }
+  svg += '<line x1="'+padL+'" y1="10" x2="'+(padL+14)+'" y2="10" stroke="#2ecc71" stroke-width="2.5" stroke-linecap="round"/>';
+  svg += '<text x="'+(padL+18)+'" y="13" font-size="9" fill="#374151">'+rcPlanName(s1.key)+'</text>';
+  svg += '<line x1="'+padL+'" y1="20" x2="'+(padL+14)+'" y2="20" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round"/>';
+  svg += '<text x="'+(padL+18)+'" y="23" font-size="9" fill="#374151">'+rcPlanName(s2.key)+'</text>';
+  svg += '</svg>';
+  wrap.innerHTML = svg;
+}
+
+function rcRenderTable(selected, priority) {
+  var t = rcEl("summaryTable");
+  var headers = ["Feature"];
+  for (var i = 0; i < selected.length; i++) headers.push(rcPlanName(selected[i]));
+
+  var riskMap     = { fia:'<span class="rc-badge good">Protected</span>',fixed:'<span class="rc-badge good">Protected</span>',variable:'<span class="rc-badge mid">Market-linked</span>',mf:'<span class="rc-badge bad">Market-linked</span>',bonds:'<span class="rc-badge mid">Lower risk</span>' };
+  var feeMap      = { fia:'<span class="rc-badge mid">Varies</span>',fixed:'<span class="rc-badge good">Low</span>',variable:'<span class="rc-badge bad">Higher</span>',mf:'<span class="rc-badge mid">Mgmt fee</span>',bonds:'<span class="rc-badge mid">Low-mid</span>' };
+  var growthMap   = { fia:'<span class="rc-badge mid">Capped</span>',fixed:'<span class="rc-badge bad">Lower</span>',variable:'<span class="rc-badge good">Higher</span>',mf:'<span class="rc-badge good">Higher</span>',bonds:'<span class="rc-badge bad">Lower</span>' };
+  var incomeMap   = { fia:'<span class="rc-badge good">Strong</span>',fixed:'<span class="rc-badge good">Strong</span>',variable:'<span class="rc-badge mid">Possible</span>',mf:'<span class="rc-badge bad">No guarantee</span>',bonds:'<span class="rc-badge bad">No guarantee</span>' };
+  var inflMap     = { fia:'<span class="rc-badge mid">Depends</span>',fixed:'<span class="rc-badge bad">Weaker</span>',variable:'<span class="rc-badge good">Better</span>',mf:'<span class="rc-badge good">Better</span>',bonds:'<span class="rc-badge mid">Moderate</span>' };
+
+  var rowDefs = [
+    { label:"Downside Risk",      map:riskMap   },
+    { label:"Fees/Costs",         map:feeMap    },
+    { label:"Growth Upside",      map:growthMap },
+    { label:"Income Options",     map:incomeMap },
+    { label:"Inflation Handling", map:inflMap   }
+  ];
+
+  var html = "<tr>";
+  for (var i = 0; i < headers.length; i++) html += "<th>" + headers[i] + "</th>";
+  html += "</tr>";
+
+  for (var r = 0; r < rowDefs.length; r++) {
+    html += "<tr><td style='font-weight:900'>" + rowDefs[r].label + "</td>";
+    for (var i = 0; i < selected.length; i++) {
+      html += "<td>" + (rowDefs[r].map[selected[i]] || "&#8212;") + "</td>";
+    }
+    html += "</tr>";
+  }
+  t.innerHTML = html;
+}
+
+// =====================================================================
+// BUTTON WIRING
+//
+// rcWireButtons() is called from showStep() every time a panel enters
+// the DOM, so buttons in panels 2-4 (which were detached at init time)
+// get their direct listeners attached when they become visible.
+// =====================================================================
+var rcBound = {};
+
+function rcWireButtons() {
+  var specs = [
+    ["rcBN1", function(){ rcNext(1); }],
+    ["rcBB2", function(){ rcBack(2); }],
+    ["rcBN2", function(){ rcNext(2); }],
+    ["rcBB3", function(){ rcBack(3); }],
+    ["rcBN3", function(){ rcNext(3); }],
+    ["rcBB4", function(){ rcBack(4); }],
+    ["rcBRS", function(){ rcRestart(); }]
+  ];
+  for (var i = 0; i < specs.length; i++) {
+    var id = specs[i][0], fn = specs[i][1];
+    if (rcBound[id]) continue;
+    var el = document.getElementById(id);
+    if (el) { el.addEventListener("click", fn); rcBound[id] = true; }
+  }
+}
+
+// =====================================================================
+// INIT
+// =====================================================================
+function rcInit() {
+  if (window.rcInitialized) return; window.rcInitialized = true;
+  // Checkbox defaults
+  var fia = rcEl("pick_fia"), mf = rcEl("pick_mf");
+  if (fia) { fia.checked = true; rcState.picks.add("fia"); }
+  if (mf)  { mf.checked  = true; rcState.picks.add("mf");  }
+  rcUpdateChoiceStyles();
+
+  // Wire step-1 buttons (only panel in DOM at init time)
+  rcWireButtons();
+
+  // Document-level click delegation — catches nav clicks regardless of
+  // whether onclick attributes were stripped by GHL, and regardless of
+  // which panel is currently in the DOM.
+  document.addEventListener("click", function(e) {
+    var btn = rcFindNavBtn(e.target);
+    if (!btn) return;
+    rcHandleNav(btn.getAttribute("name") || "");
+  });
+}
+
+// Run after DOM is ready, whether GHL moved the script or not
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", rcInit);
+} else {
+  rcInit();
+}
+</script>
